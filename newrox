@@ -1,0 +1,1645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Wingo - Login & Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&family=Poppins:wght@400;600;700&family=Orbitron:wght@500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #162C6E;
+      --accent-color: #F97316;
+      --accent-hover-color: #FDBA74;
+      --accent-color-rgb: 249, 115, 22;
+      --soft-black: #1a1a1a;
+      --light-black: #2d2d2d;
+      --light-gray: #d1d5db;
+      --purple: #7b3fe4;
+      --blue: #4361ee;
+      --win-green: #28a745;
+      --loss-red: #dc3545;
+      --neon-blue: #00f2ff;
+      --modal-bg: #f0f4f8;
+      --cyan: #00bcd4;
+    }
+
+    body {
+      font-family: 'El Messiri', sans-serif;
+      background-color: var(--primary-color);
+      color: #F3F4F6;
+      position: relative;
+      min-height: 100vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .floating-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      overflow: hidden;
+    }
+
+    .floating-particle {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      animation: floatParticle 15s infinite ease-in-out;
+    }
+
+    @keyframes floatParticle {
+      0% { transform: translateY(100vh) scale(0.5); opacity: 0.2; }
+      50% { opacity: 0.5; }
+      100% { transform: translateY(-100vh) scale(1.5); opacity: 0; }
+    }
+
+    .card {
+      transition: all 0.3s ease;
+      background: rgba(31, 41, 55, 0.9);
+      border-radius: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .card:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 15px 30px rgba(var(--accent-color-rgb), 0.4);
+    }
+
+    .gradient-bg {
+      background: linear-gradient(135deg, var(--accent-color), var(--accent-hover-color));
+    }
+
+    svg.header-svg {
+      width: 70%;
+      height: auto;
+      overflow: visible;
+      margin: 0 auto;
+      display: block;
+    }
+
+    svg.header-svg text {
+      text-anchor: middle;
+      dominant-baseline: middle;
+      text-transform: uppercase;
+      animation: stroke 5s infinite alternate;
+      stroke-width: 1;
+      stroke: var(--accent-color);
+      font-size: 110px;
+      fill: rgba(255, 255, 255, 0);
+    }
+
+    @keyframes stroke {
+      0% { fill: rgba(255, 255, 255, 0); stroke: var(--accent-color); stroke-dashoffset: 25%; stroke-dasharray: 0 50%; stroke-width: 2; }
+      70% { fill: rgba(255, 255, 255, 0); stroke: var(--accent-hover-color); }
+      80% { fill: rgba(255, 255, 255, 0); stroke: var(--accent-color); stroke-width: 3; }
+      100% { fill: #F3F4F6; stroke: rgba(var(--accent-color-rgb), 0); stroke-dashoffset: -25%; stroke-dasharray: 50% 0; stroke-width: 0; }
+    }
+
+    @keyframes bounceIn {
+      0% { transform: scale(0.8); opacity: 0; }
+      60% { transform: scale(1.05); opacity: 1; }
+      100% { transform: scale(1); }
+    }
+
+    .popup {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .popup-content {
+      display: flex;
+      flex-direction: column;
+      background: #1F2937;
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 8px 16px rgba(var(--accent-color-rgb), 0.2);
+      border: 2px solid var(--accent-color);
+      text-align: center;
+      width: 90%;
+      max-width: 400px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .popup.show {
+      display: flex;
+    }
+
+    .header-text {
+      color: var(--accent-color);
+    }
+
+    .subtle-border {
+      border: 1px solid #4B5563;
+    }
+
+    .bg-dark-card {
+      background: #1F2937;
+    }
+
+    .rupee-effect {
+      position: fixed;
+      color: var(--accent-color);
+      font-size: 2rem;
+      pointer-events: none;
+      z-index: 9999;
+      animation: rupeeFade 1s ease-out forwards;
+    }
+
+    @keyframes rupeeFade {
+      0% { opacity: 1; transform: scale(1); }
+      100% { opacity: 0; transform: scale(1.5) translateY(-20px); }
+    }
+
+    .popup-button {
+      padding: 0.5rem 1rem;
+      margin: 0.5rem;
+      border-radius: 0.5rem;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      background: #808080; /* Default for non-confirm buttons */
+      color: #F3F4F6;
+    }
+
+    .popup-button:hover {
+      background: #A9A9A9; /* Default hover */
+    }
+
+    .confirm-btn { /* Specific style for confirm buttons */
+      background: var(--accent-color);
+      color: #F3F4F6;
+    }
+
+    .confirm-btn:hover {
+      background: var(--accent-hover-color);
+    }
+
+    .entry-btn {
+      width: 150px; /* Fixed width for entry button */
+      background: var(--accent-color); /* Ensure it uses accent color */
+    }
+    .entry-btn:hover {
+      background: var(--accent-hover-color);
+    }
+
+
+    .input-field {
+      background: #374151;
+      border: 1px solid var(--accent-color);
+      color: #F3F4F6;
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      width: 100%;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    .input-field:focus {
+      border-color: var(--accent-hover-color);
+      box-shadow: 0 0 8px rgba(var(--accent-color-rgb), 0.3);
+    }
+
+    .display-box {
+        background: #374151;
+        border: 1px solid var(--accent-color);
+        color: #F3F4F6;
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+        width: 100%;
+        pointer-events: none; /* Make it non-editable */
+    }
+
+
+    .copy-feedback {
+      display: none;
+      background: #1F2937;
+      color: #34D399;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.5rem;
+      border: 1px solid var(--accent-color);
+      animation: slideIn 0.5s ease-in-out;
+    }
+
+    .copy-feedback.show {
+      display: block;
+    }
+
+    .device-id {
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .device-id:hover {
+      color: var(--accent-hover-color);
+    }
+
+    .toast {
+        display: none;
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #1F2937;
+        color: #F3F4F6;
+        padding: 1rem 1.5rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 4px 8px rgba(var(--accent-color-rgb), 0.2);
+        border: 1px solid var(--accent-color);
+        z-index: 1000;
+        max-width: 300px;
+        animation: slideIn 0.5s ease-in-out;
+    }
+
+    .toast.show {
+        display: block;
+    }
+
+    @keyframes slideIn {
+        0% { transform: translateY(100%); opacity: 0; }
+        100% { transform: translateY(0); opacity: 1; }
+    }
+
+
+    #adminMessagePopup {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #adminMessagePopup.show {
+        display: flex;
+    }
+
+    #adminMessageContent {
+        display: flex;
+        flex-direction: column;
+        background: #1F2937;
+        padding: 2rem;
+        border-radius: 1rem;
+        box-shadow: 0 8px 16px rgba(var(--accent-color-rgb), 0.2);
+        border: 2px solid var(--accent-color);
+        text-align: center;
+        width: 90%;
+        max-width: 400px;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+
+
+    /* Game Section Specific Animations */
+    @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); opacity: 0.9; } }
+    @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+    @keyframes dash { 0% { stroke-dashoffset: 500; } 100% { stroke-dashoffset: 0; } }
+    @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-5px); } }
+    @keyframes win-bounce { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
+    @keyframes loss-shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 50% { transform: translateX(5px); } 75% { transform: translateX(-5px); } }
+    @keyframes letter-glow { 0%, 100% { text-shadow: 0 0 5px var(--neon-blue), 0 0 10px var(--neon-blue), 0 0 15px var(--neon-blue); } 50% { text-shadow: 0 0 10px var(--neon-blue), 0 0 20px var(--neon-blue), 0 0 30px var(--neon-blue); } }
+    @keyframes title-pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.8; } }
+    @keyframes toast-slide { 0% { bottom: -50px; opacity: 0; } 10% { bottom: 20px; opacity: 1; } 90% { bottom: 20px; opacity: 1; } 100% { bottom: -50px; opacity: 0; } }
+    @keyframes button-glow { 0%, 100% { box-shadow: 0 0 5px var(--loss-red), 0 0 10px var(--loss-red); } 50% { box-shadow: 0 0 10px var(--loss-red), 0 0 20px var(--loss-red); } }
+    @keyframes modal-fade-in { 0% { opacity: 0; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1); } }
+
+    .win-animation { animation: win-bounce 0.6s ease-in-out infinite; }
+    .loss-animation { animation: loss-shake 0.5s ease-in-out infinite; }
+    .title-animation { animation: title-pulse 2s ease-in-out infinite; }
+    .letter-glow { animation: letter-glow 1.5s ease-in-out infinite; }
+    .button-glow { animation: button-glow 1.5s ease-in-out infinite; }
+    .modal-fade-in { animation: modal-fade-in 0.3s ease-in-out; }
+
+    /* Modal Styles */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000; /* Ensure modal is on top */
+    }
+    .modal-content { /* Re-styling for consistency with other popups */
+        background: #1F2937;
+        padding: 2rem;
+        border-radius: 1rem;
+        box-shadow: 0 8px 16px rgba(var(--accent-color-rgb), 0.2);
+        border: 2px solid var(--accent-color);
+        text-align: center;
+        width: 90%;
+        max-width: 350px; /* Slightly wider for modal content */
+    }
+    .modal-title {
+        color: var(--accent-color); /* Use accent color for title */
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+    .modal-message {
+        color: #F3F4F6; /* Light text for message */
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    .modal-buttons {
+        display: flex;
+        justify-content: space-around;
+        gap: 1rem;
+    }
+    .modal-button { /* General modal button style */
+        padding: 0.5rem 1.5rem; /* Consistent padding */
+        border-radius: 0.5rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        color: #F3F4F6;
+    }
+    .modal-button.yes {
+        background-color: var(--accent-color);
+    }
+    .modal-button.yes:hover {
+        background-color: var(--accent-hover-color);
+    }
+    .modal-button.no {
+        background-color: #4B5563; /* Darker gray for 'No' */
+    }
+    .modal-button.no:hover {
+        background-color: #6B7280; /* Lighter gray on hover */
+    }
+
+    /* Pattern Box Styles (Pro Mode) */
+    .pattern-box {
+        background: rgba(55, 65, 81, 0.8);
+        border: 1px solid var(--accent-color);
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+    .pattern-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+    }
+    .pattern-label { color: var(--light-gray); }
+    .pattern-value { color: var(--neon-blue); font-weight: bold; }
+
+    /* Mode Buttons */
+    .mode-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    .mode-button {
+        padding: 0.5rem 2rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 1px solid var(--accent-color);
+    }
+    .mode-button.active {
+        background-color: var(--accent-color);
+        color: white;
+    }
+    .mode-button.inactive {
+        background-color: #374151;
+        color: #F3F4F6;
+    }
+    .mode-button:hover {
+        background-color: var(--accent-hover-color);
+        color: white;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="floating-bg" id="floatingBg"></div>
+
+  <div id="adminMessagePopup" class="popup">
+    <div id="adminMessageContent" class="popup-content">
+      <p id="adminPopupMessage" class="text-lg font-semibold mb-4 text-white"></p>
+      <div class="flex justify-center">
+        <button id="closeAdminMessageBtn" class="popup-button confirm-btn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="invalidKeyPopup" class="popup">
+    <div class="popup-content">
+      <p id="errorMessage" class="text-lg font-semibold mb-4 text-white"></p>
+      <div class="flex justify-center">
+        <button id="closeInvalidKeyBtn" class="popup-button confirm-btn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="maintenancePopup" class="popup">
+    <div class="popup-content">
+      <p class="text-lg font-semibold mb-4 text-white">Server Under Maintenance</p>
+      <p class="text-white mb-4">Please try again later.</p>
+      </div>
+  </div>
+
+
+  <header id="loginHeader" class="text-center mt-0 mb-2">
+    <svg viewBox="0 0 800 200" class="header-svg">
+      <text x="50%" y="50%" class="header-text">DORAEMON LOGIN</text>
+    </svg>
+  </header>
+
+  <div id="loginSection" class="max-w-full mx-auto p-4 w-full relative">
+    <div class="max-w-md mx-auto p-5 w-full">
+      <div class="card mb-5 overflow-hidden gradient-bg">
+        <div class="bg-dark-card bg-opacity-90 p-5 rounded-lg subtle-border">
+          <h2 class="text-2xl font-bold text-orange-500 text-center mb-6">
+            Login
+          </h2>
+          <div class="space-y-4">
+            <div class="animate-bounceIn">
+              <label for="accessKey" class="block text-orange-400 text-sm mb-1">Access Key</label>
+              <input id="accessKey" type="text" class="input-field" placeholder="Enter Access Key">
+            </div>
+            <div class="text-center animate-bounceIn" style="animation-delay: 0.1s;">
+              <button onclick="login()" class="popup-button confirm-btn w-32 mx-auto flex items-center justify-center">
+                <i class="fas fa-sign-in-alt mr-2"></i>Login
+              </button>
+            </div>
+            <div class="animate-bounceIn text-center" style="animation-delay: 0.2s;">
+              <p class="block text-orange-400 text-sm mb-1">Device ID (Tap to Copy)</p>
+              <span id="deviceId" class="device-id text-white font-semibold"></span>
+              <p id="copyFeedback" class="copy-feedback">Copied!</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <header id="dashboardHeader" class="text-center mt-0 mb-2" style="display: none;">
+    <svg viewBox="0 0 800 200" class="header-svg">
+      <text x="50%" y="50%" class="header-text">DASHBOARD</text>
+    </svg>
+  </header>
+
+  <div id="dashboardSection" class="max-w-full mx-auto p-4 w-full" style="display: none;">
+    <div class="max-w-md mx-auto p-5 w-full">
+      <div class="card mb-5 overflow-hidden gradient-bg">
+        <div class="bg-dark-card bg-opacity-90 p-5 rounded-lg subtle-border">
+          <h2 class="text-2xl font-bold text-orange-500 text-center mb-6">
+            Dashboard
+          </h2>
+          <div class="space-y-4">
+            <div class="animate-bounceIn">
+              <p class="block text-orange-400 text-sm mb-1">Access Key</p>
+              <div id="dashboardAccessKey" class="display-box"></div>
+            </div>
+            <div class="animate-bounceIn" style="animation-delay: 0.1s;">
+              <p class="block text-orange-400 text-sm mb-1">Device ID</p>
+              <div id="dashboardDeviceId" class="display-box"></div>
+            </div>
+            <div class="animate-bounceIn" style="animation-delay: 0.2s;">
+              <p class="block text-orange-400 text-sm mb-1">Key Validity</p>
+              <div id="keyValidity" class="display-box"></div>
+            </div>
+            <div class="text-center animate-bounceIn" style="animation-delay: 0.3s;">
+              <button onclick="showGameSection()" class="popup-button confirm-btn entry-btn mx-auto flex items-center justify-center">
+                <i class="fas fa-link mr-2"></i>Entry
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <header id="gameHeader" class="text-center mt-0 mb-2" style="display: none;">
+    <svg viewBox="0 0 800 200" class="header-svg">
+      <text x="50%" y="50%" class="header-text title-animation">
+        <tspan class="letter-glow">D</tspan><tspan class="letter-glow">O</tspan><tspan class="letter-glow">R</tspan><tspan class="letter-glow">A</tspan><tspan class="letter-glow">E</tspan><tspan class="letter-glow">M</tspan><tspan class="letter-glow">O</tspan><tspan class="letter-glow">N</tspan><tspan class="letter-glow">-</tspan><tspan class="letter-glow">A</tspan><tspan class="letter-glow">I</tspan>
+      </text>
+    </svg>
+  </header>
+
+  <div id="gameSection" class="max-w-full mx-auto p-4 w-full" style="display: none;">
+    <div class="container mx-auto max-w-md p-5">
+      <div class="mode-buttons">
+        <button id="basicModeBtn" class="mode-button active" onclick="switchToBasicMode()">Basic</button>
+        <button id="proModeBtn" class="mode-button inactive" onclick="switchToProMode()">Pro</button>
+      </div>
+
+      <div id="predictionCard" class="card bg-gray-900 rounded-xl p-5 mb-5 shadow-lg border border-gray-700 animate-[float_6s_infinite_ease-in-out]">
+        <div class="section-title text-lg font-semibold text-blue-400 mb-4 animate-[pulse_3s_infinite_ease-in-out]">
+          <i class="fas fa-brain mr-2"></i> Period & Prediction
+        </div>
+        <div class="period-label text-gray-400 font-bold mb-2 flex items-center">
+          <i class="fas fa-calendar-days mr-2 text-purple-500"></i> Period
+        </div>
+        <input type="text" id="periodDisplay" value="-" readonly class="w-full p-3 mb-2 border-2 border-purple-500 rounded-lg bg-gray-800 text-center text-white" />
+        <div class="result-box relative text-center p-4 rounded-lg bg-gray-800 border border-blue-500 mb-2">
+          <div class="text-gray-400 mb-2">Result: <span id="resultStatus">-</span></div>
+          <div class="text-2xl font-bold text-blue-400" id="predictionDisplay">-</div>
+          <div class="text-gray-400 mt-2">Opposite Number: <span id="oppositeNumberDisplay">-</span></div>
+        </div>
+        <div class="progress-container mt-4">
+          <div class="progress-bar h-3 bg-gray-700 rounded-full overflow-hidden">
+            <div id="progressBarFill" class="progress-bar-fill h-full bg-gradient-to-r from-purple-500 to-blue-500 rounded-full animate-[shimmer_2s_linear_infinite]"></div>
+          </div>
+          <p class="text-center text-gray-400 mt-2">Win rate: <span id="confidenceDisplay">CHECK</span></p>
+        </div>
+        <p class="text-center text-gray-400 mt-2">Active Logic: <span id="activeLogic">-</span></p>
+      </div>
+
+      <div id="analysisCard" class="card bg-gray-900 rounded-xl p-5 mb-5 shadow-lg border border-gray-700 animate-[float_6s_infinite_ease-in-out]">
+        <div class="section-title text-lg font-semibold text-blue-400 mb-4 animate-[pulse_3s_infinite_ease-in-out]">
+          <i class="fas fa-tachometer-alt mr-2"></i> Analysis Dashboard
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="box bg-gray-800 rounded-lg p-4 text-center text-gray-300 shadow-md">
+            Wins<span id="wins" class="block mt-2 text-xl font-bold text-green-500">0</span>
+          </div>
+          <div class="box bg-gray-800 rounded-lg p-4 text-center text-gray-300 shadow-md">
+            Losses<span id="losses" class="block mt-2 text-xl font-bold text-red-500">0</span>
+          </div>
+          <div class="box bg-gray-800 rounded-lg p-4 text-center text-gray-300 shadow-md">
+            Win Rate<span id="accuracy" class="block mt-2 text-xl font-bold text-blue-400">0%</span>
+          </div>
+          <div class="box bg-gray-800 rounded-lg p-4 text-center text-gray-300 shadow-md">
+            Server Status<span id="serverStatus" class="block mt-2 text-xl font-bold text-green-500">Connected</span>
+          </div>
+        </div>
+      </div>
+
+      <div id="patternCard" class="card bg-gray-900 rounded-xl p-5 mb-5 shadow-lg border border-gray-700 animate-[float_6s_infinite_ease-in-out]" style="display: none;">
+        <div class="section-title text-lg font-semibold text-blue-400 mb-4 animate-[pulse_3s_infinite_ease-in-out]">
+          <i class="fas fa-chart-bar mr-2"></i> Pattern Analysis
+        </div>
+        <div class="pattern-box">
+          <div class="pattern-item">
+            <span class="pattern-label">Recent Pattern</span>
+            <span id="recentPattern" class="pattern-value">-</span>
+          </div>
+          <div class="pattern-item">
+            <span class="pattern-label">Big/Small Ratio</span>
+            <span id="bigSmallRatio" class="pattern-value">-</span>
+          </div>
+          <div class="pattern-item">
+            <span class="pattern-label">Pattern Confidence</span>
+            <span id="patternConfidence" class="pattern-value">-</span>
+          </div>
+          <div class="pattern-item">
+            <span class="pattern-label">Win Level</span>
+            <span id="winLevelDisplay" class="pattern-value">0</span>
+          </div>
+        </div>
+      </div>
+
+      <div id="historyCard" class="card bg-gray-900 rounded-xl p-5 mb-5 shadow-lg border border-gray-700 animate-[float_6s_infinite_ease-in-out]">
+        <div class="section-title text-lg font-semibold text-blue-400 mb-4 animate-[pulse_3s_infinite_ease-in-out]">
+          <i class="fas fa-history mr-2"></i> History
+        </div>
+        <div id="historyContainer" class="space-y-3">
+          </div>
+        <button class="delete-btn mt-4 w-full py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all animate-[pulse_3s_infinite] button-glow" onclick="showClearHistoryModal()">
+          <i class="fas fa-trash-alt mr-2"></i> Clear All History
+        </button>
+      </div>
+
+      <div id="wingoResultsCard" class="card bg-gray-900 rounded-xl p-5 mb-5 shadow-lg border border-gray-700 animate-[float_6s_infinite_ease-in-out]" style="display: none;">
+        <div class="section-title text-lg font-semibold text-blue-400 mb-4 animate-[pulse_3s_infinite_ease-in-out]">
+          <i class="fas fa-history mr-2"></i> Wingo 1 Min - Last 10 Results
+        </div>
+        <div id="wingoResultsContainer" class="space-y-3">
+            </div>
+      </div>
+
+
+      <div class="footer text-center text-gray-400 font-bold text-sm mt-6">
+        ©2025 CREATED BY DORAEMON API SERVER | version 3.2.1
+      </div>
+    </div>
+  </div>
+
+  <div id="clearHistoryModal" class="modal-overlay hidden"> <div class="modal-content modal-fade-in"> <div class="modal-title">Confirm Clear History</div>
+      <div class="modal-message">Are you sure you want to clear all prediction history?</div>
+      <div class="modal-buttons">
+        <button class="modal-button yes" onclick="confirmClearHistory()">Yes</button>
+        <button class="modal-button no" onclick="hideClearHistoryModal()">No</button>
+      </div>
+    </div>
+  </div>
+
+
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+
+  <script>
+    // --- Dynamic Color Scheme Logic ---
+    const colorSchemes = [
+      { primary: '#162C6E', accent: '#F97316', accentHover: '#FDBA74', accentRgb: '249, 115, 22' },
+      { primary: '#1E3A8A', accent: '#EF4444', accentHover: '#FCA5A5', accentRgb: '239, 68, 68' }, // Example: Dark Blue with Red accent
+      { primary: '#2A8CC2', accent: '#FFFFFF', accentHover: '#E5E7EB', accentRgb: '255, 255, 255' } // Example: Lighter Blue with White accent
+    ];
+
+    function updateColors() {
+      const schemeIndex = Math.floor(Date.now() / 10000) % colorSchemes.length; // Change scheme every 10 seconds
+      const scheme = colorSchemes[schemeIndex];
+
+      document.documentElement.style.setProperty('--primary-color', scheme.primary);
+      document.documentElement.style.setProperty('--accent-color', scheme.accent);
+      document.documentElement.style.setProperty('--accent-hover-color', scheme.accentHover);
+      document.documentElement.style.setProperty('--accent-color-rgb', scheme.accentRgb);
+    }
+
+    updateColors();
+    setInterval(updateColors, 10000); // Update colors every 10 seconds
+
+    // --- Floating Particles ---
+    function createFloatingParticles() {
+        const floatingBg = document.getElementById('floatingBg');
+        if (!floatingBg) return;
+        for (let i = 0; i < 30; i++) { // Number of particles
+            const particle = document.createElement('div');
+            particle.className = 'floating-particle';
+            particle.style.width = `${Math.random() * 20 + 10}px`;
+            particle.style.height = particle.style.width;
+            particle.style.left = `${Math.random() * 100}%`;
+            particle.style.animationDelay = `${Math.random() * 15}s`; // Randomize start time
+            floatingBg.appendChild(particle);
+        }
+    }
+    createFloatingParticles();
+
+
+    // --- Rupee Effect on Click ---
+    function createRupeeEffect(x, y) {
+      const rupee = document.createElement('div');
+      rupee.className = 'rupee-effect';
+      rupee.textContent = '₹'; // Rupee symbol
+      rupee.style.left = `${x}px`;
+      rupee.style.top = `${y}px`;
+      document.body.appendChild(rupee);
+      setTimeout(() => rupee.remove(), 1000); // Remove after 1 second
+    }
+
+    document.addEventListener('click', (e) => {
+      createRupeeEffect(e.clientX, e.clientY);
+    });
+    document.addEventListener('touchstart', (e) => {
+      if (e.touches.length > 0) {
+        const touch = e.touches[0];
+        createRupeeEffect(touch.clientX, touch.clientY);
+      }
+    });
+
+    // --- Sparkle Effect (Placeholder) ---
+    function startSparkleEffect() {
+      // This can be expanded with actual sparkle logic if needed
+      // console.log("Sparkle effect started (placeholder)");
+    }
+
+
+    // --- Device ID Management ---
+    function generateDeviceId() {
+      // Generates a simple pseudo-random device ID
+      const numbers = Math.floor(Math.random() * 100).toString().padStart(2, '0'); // 00-99
+      const letters = Array.from({length: 2}, () => String.fromCharCode(97 + Math.floor(Math.random() * 26))).join(''); // a-z
+      return `DORA-${numbers}${letters}`; // e.g., DORA-12ab
+    }
+
+    function getDeviceId() {
+      let deviceId = localStorage.getItem("deviceId");
+      if (!deviceId) {
+        deviceId = generateDeviceId();
+        localStorage.setItem("deviceId", deviceId);
+      }
+      return deviceId;
+    }
+
+    function copyDeviceId() {
+        const deviceIdText = document.getElementById('deviceId').textContent;
+        const copyFeedback = document.getElementById('copyFeedback');
+        if (!deviceIdText) {
+            showInvalidKeyPopup("Device ID not available to copy.");
+            return;
+        }
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(deviceIdText)
+            .then(() => {
+                copyFeedback.classList.add('show');
+                setTimeout(() => copyFeedback.classList.remove('show'), 2000);
+                console.log('Device ID copied:', deviceIdText);
+            })
+            .catch(err => {
+                console.error('Failed to copy Device ID using Clipboard API:', err);
+                fallbackCopyDeviceId(deviceIdText); // Fallback for browsers that might restrict clipboard API in iframes
+            });
+        } else {
+            console.log('Clipboard API not available, using fallback');
+            fallbackCopyDeviceId(deviceIdText);
+        }
+    }
+
+    function fallbackCopyDeviceId(text) {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed'; // Prevent scrolling to bottom of page in MS Edge.
+        textarea.style.opacity = '0'; // Make it invisible
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+
+        try {
+            const successful = document.execCommand('copy');
+            const copyFeedback = document.getElementById('copyFeedback');
+            if (successful) {
+                copyFeedback.classList.add('show');
+                setTimeout(() => copyFeedback.classList.remove('show'), 2000);
+                console.log('Device ID copied using fallback:', text);
+            } else {
+                console.error('Fallback copy failed');
+                showInvalidKeyPopup('Failed to copy Device ID. Please copy manually.');
+            }
+        } catch (err) {
+            console.error('Fallback copy error:', err);
+            showInvalidKeyPopup('Failed to copy Device ID. Please copy manually.');
+        } finally {
+            document.body.removeChild(textarea);
+        }
+    }
+
+
+    // --- Popup Management ---
+    function showInvalidKeyPopup(message) {
+      const errorMessage = document.getElementById('errorMessage');
+      if (errorMessage) {
+        errorMessage.textContent = message;
+        document.getElementById('invalidKeyPopup').classList.add('show');
+      } else {
+        console.error('Error message element not found for invalidKeyPopup.');
+      }
+    }
+
+    function hideInvalidKeyPopup() {
+      document.getElementById('invalidKeyPopup').classList.remove('show');
+    }
+
+    function showAdminMessagePopup(message) {
+        const adminPopupMessage = document.getElementById('adminPopupMessage');
+        if (adminPopupMessage) {
+            adminPopupMessage.textContent = message;
+            document.getElementById('adminMessagePopup').classList.add('show');
+        } else {
+            console.error('Admin popup message element not found.');
+        }
+    }
+
+    function hideAdminMessagePopup() {
+        document.getElementById('adminMessagePopup').classList.remove('show');
+    }
+
+    // --- Server and Message Handling ---
+    let isServerOn = true; // Assume server is on by default, will be updated by Firebase
+    let messageQueue = [];
+    let isShowingMessage = false;
+
+
+    // --- Firebase Configuration (Updated to match Admin Panel) ---
+    const firebaseConfig = {
+      apiKey: "AIzaSyDCGgg1TgPjkTNkx5NUSFdDCduRf1uSba4",
+      authDomain: "newrox-ai.firebaseapp.com",
+      databaseURL: "https://newrox-ai-default-rtdb.firebaseio.com", // From Admin Panel
+      projectId: "newrox-ai",
+      storageBucket: "newrox-ai.firebasestorage.app", // From Admin Panel
+      messagingSenderId: "521506398161",
+      appId: "1:521506398161:web:ca6a684b6616bbb3000af0",
+      measurementId: "G-LH2B2C3HLL" // Optional
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    // --- Game State Management ---
+    let historyData = [];
+    let lastFetchedPeriod = null;
+    let lastResult = null;
+    let lastPrediction = null;
+    let lastStatus = null;
+    let lastOppositeNumber = null;
+    let globalPrediction = null;
+    let winLevel = 0;
+    const MAX_WIN_LEVEL = 2;
+
+    function saveGameState() {
+        const gameState = {
+            historyData,
+            lastFetchedPeriod,
+            lastResult,
+            lastPrediction,
+            lastStatus,
+            lastOppositeNumber,
+            globalPrediction,
+            winLevel
+        };
+        try {
+            localStorage.setItem('gameState_wingo', JSON.stringify(gameState)); // Use a unique key
+            // console.log('Game state saved to localStorage');
+        } catch (e) {
+            console.error("Error saving game state to localStorage:", e);
+        }
+    }
+
+    function restoreGameState() {
+        try {
+            const savedState = localStorage.getItem('gameState_wingo'); // Use the unique key
+            if (savedState) {
+                const state = JSON.parse(savedState);
+                historyData = state.historyData || [];
+                lastFetchedPeriod = state.lastFetchedPeriod || null;
+                lastResult = state.lastResult || null;
+                lastPrediction = state.lastPrediction || null;
+                lastStatus = state.lastStatus || null;
+                lastOppositeNumber = state.lastOppositeNumber || null;
+                globalPrediction = state.globalPrediction || null;
+                winLevel = state.winLevel || 0;
+
+                if (historyData.length > 0) {
+                    const latestEntry = historyData[0];
+                    document.getElementById("periodDisplay").value = latestEntry.period || "-";
+                    document.getElementById("predictionDisplay").innerText = latestEntry.prediction || "-";
+                    document.getElementById("oppositeNumberDisplay").innerText = latestEntry.oppositeNumber || "-";
+                    if (latestEntry.resultStatus === "Pending") {
+                        document.getElementById("resultStatus").innerText = "-";
+                        document.getElementById("resultStatus").style.color = "var(--light-gray)";
+                    } else {
+                        document.getElementById("resultStatus").innerText = `${latestEntry.resultStatus} (${latestEntry.result})`;
+                        document.getElementById("resultStatus").style.color = latestEntry.resultStatus === "WIN" ? "var(--win-green)" : "var(--loss-red)";
+                    }
+                    const confidencePercent = latestEntry.prediction ? Math.round(autoPredict().confidence * 100) : 0;
+                    document.getElementById("confidenceDisplay").innerText = `${confidencePercent}%`;
+                    document.getElementById("progressBarFill").style.width = `${confidencePercent}%`;
+                }
+                updateHistory();
+                updateStats();
+                // console.log('Game state restored from localStorage');
+            }
+        } catch (e) {
+            console.error("Error restoring game state from localStorage:", e);
+            // Optionally clear localStorage if parsing fails to prevent future errors
+            // localStorage.removeItem('gameState_wingo');
+        }
+    }
+
+    function clearPredictionDisplay() {
+        document.getElementById("periodDisplay").value = "-";
+        document.getElementById("resultStatus").innerText = "Server Offline";
+        document.getElementById("resultStatus").style.color = "var(--loss-red)";
+        document.getElementById("predictionDisplay").innerText = "-";
+        document.getElementById("oppositeNumberDisplay").innerText = "-";
+        document.getElementById("confidenceDisplay").innerText = "CHECK";
+        document.getElementById("progressBarFill").style.width = "0%";
+        document.getElementById('activeLogic').textContent = '-';
+    }
+
+
+    function checkServerStatus() {
+      const maintenancePopup = document.getElementById('maintenancePopup');
+      const serverStatusElement = document.getElementById('serverStatus'); // In game section
+
+      database.ref("serverStatus").on("value", snapshot => {
+        const serverData = snapshot.val() || { status: "on" }; // Default to 'on' if not set
+        const wasServerOn = isServerOn;
+        isServerOn = serverData.status === "on";
+
+        if (!isServerOn) {
+          maintenancePopup.classList.add('show');
+          if(serverStatusElement) {
+            serverStatusElement.textContent = "Offline";
+            serverStatusElement.className = "block mt-2 text-xl font-bold text-red-500";
+          }
+          saveGameState(); // Save state before clearing display
+          clearPredictionDisplay();
+        } else {
+          maintenancePopup.classList.remove('show');
+           if(serverStatusElement) {
+            serverStatusElement.textContent = "Connected";
+            serverStatusElement.className = "block mt-2 text-xl font-bold text-green-500";
+          }
+          if (!wasServerOn && document.getElementById('gameSection').style.display === 'block') { // If server was off and now on, and we are in game section
+            restoreGameState();
+            updatePrediction(); // Fetch new prediction
+          }
+        }
+      }, err => {
+        console.error('Error checking server status:', err);
+        showInvalidKeyPopup('Error checking server status. Please try again later.');
+        isServerOn = false; // Assume server is off on error
+        if(serverStatusElement) {
+            serverStatusElement.textContent = "Error";
+            serverStatusElement.className = "block mt-2 text-xl font-bold text-red-500";
+        }
+        saveGameState();
+        clearPredictionDisplay();
+      });
+    }
+
+
+    function listenForCustomMessages() {
+        let isFirstLoad = true; // To prevent showing message on initial load
+
+        database.ref("customMessage").on("value", snapshot => {
+            if (isFirstLoad) {
+                isFirstLoad = false;
+                return;
+            }
+
+            const data = snapshot.val();
+            if (data && data.message && data.timestamp) {
+                // Check if this message was already shown (e.g. by storing last timestamp)
+                // For simplicity, just queue it. More robust would be to check timestamp against a stored one.
+                messageQueue.push(data.message);
+                processMessageQueue();
+            }
+        }, err => {
+            console.error('Error listening for custom messages:', err);
+        });
+
+        // Example initial message if needed, or remove if only Firebase messages are desired
+        // messageQueue.push("Welcome! Keys are available from @YOUKNOWDORAEMON.");
+        // processMessageQueue();
+    }
+
+    function processMessageQueue() {
+        if (isShowingMessage || messageQueue.length === 0) return;
+
+        isShowingMessage = true;
+        const message = messageQueue.shift();
+        
+        showAdminMessagePopup(message);
+        // console.log('Admin message displayed in popup:', message);
+    }
+
+
+    // --- Login and Dashboard Logic ---
+    async function login() {
+      try {
+        // First, check server status from Firebase
+        const serverStatusSnapshot = await database.ref("serverStatus").get();
+        const serverData = serverStatusSnapshot.val() || { status: "on" };
+
+        if (serverData.status === "off") {
+          // Show maintenance popup directly without key check
+          document.getElementById('maintenancePopup').classList.add('show');
+          return;
+        }
+        // Hide maintenance popup if it was shown and server is now on
+        document.getElementById('maintenancePopup').classList.remove('show');
+
+
+        const key = document.getElementById("accessKey").value.trim();
+        const currentDeviceId = getDeviceId(); // Use the device ID generated and stored by this client
+
+        if (!key || key.length === 0 || !/^[A-Za-z0-9\-]+$/.test(key)) {
+          showInvalidKeyPopup("Please enter a valid access key (alphanumeric and hyphens only).");
+          return;
+        }
+
+        const ref = database.ref("accessKeys/" + key);
+        const snapshot = await ref.get();
+
+        if (!snapshot.exists()) {
+          showInvalidKeyPopup("Invalid access key. Please check your key.");
+          return;
+        }
+
+        const keyData = snapshot.val();
+
+        // Check expiry
+        const now = Date.now(); // Use current client time for expiry check
+        if (keyData.expiry && now > keyData.expiry) {
+          showInvalidKeyPopup("This access key has expired.");
+          return;
+        }
+
+        // Check device ID
+        // If the key in Firebase has a deviceId, it must match the current device's ID
+        if (keyData.deviceId && keyData.deviceId !== currentDeviceId) {
+          showInvalidKeyPopup("This key is registered to a different device.");
+          return;
+        }
+        // If the key in Firebase *doesn't* have a deviceId, it implies it might be an older key
+        // or a key type that doesn't enforce device binding from the admin panel's perspective.
+        // For this client, we always expect a deviceId to be associated with the key from admin.
+        // If the admin panel *always* creates keys with deviceIds, this check is fine.
+        // If admin can create keys *without* deviceIds, and those should be usable, this logic needs adjustment.
+        // Assuming admin panel *always* sets a deviceId for keys intended for this client type:
+        if (!keyData.deviceId) {
+            showInvalidKeyPopup("Access key is not properly configured for this device. (No Device ID found on key)");
+            return;
+        }
+
+
+        localStorage.setItem("accessKey_wingo", key); // Use a unique key for localStorage
+
+        document.getElementById('loginSection').style.display = 'none';
+        document.getElementById('loginHeader').style.display = 'none';
+        document.getElementById('dashboardSection').style.display = 'block';
+        document.getElementById('dashboardHeader').style.display = 'block';
+        populateDashboard();
+
+      } catch (err) {
+        console.error('Login error:', err);
+        showInvalidKeyPopup("Error during login: " + (err.message || "Please try again."));
+      }
+    }
+
+    async function fetchKeyValidity(key) {
+        try {
+            const ref = database.ref("accessKeys/" + key);
+            const snapshot = await ref.get();
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                const expiry = data.expiry;
+                if (expiry) {
+                    const expiryDate = new Date(expiry);
+                    return expiryDate.toLocaleString('en-GB', { // Using a common locale for consistent display
+                        day: '2-digit', month: '2-digit', year: 'numeric',
+                        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+                    });
+                } else {
+                    return "No expiration set";
+                }
+            } else {
+                // This case should ideally be caught by the login function
+                // but good to have a fallback message.
+                return "Key not found.";
+            }
+        } catch (err) {
+            console.error('Error fetching key validity:', err);
+            return "Error fetching validity.";
+        }
+    }
+
+
+    async function populateDashboard() {
+      const accessKey = localStorage.getItem("accessKey_wingo");
+      const deviceId = getDeviceId(); // This client's device ID
+
+      const accessKeyElement = document.getElementById('dashboardAccessKey');
+      if (accessKey && accessKeyElement) {
+        accessKeyElement.textContent = accessKey;
+      } else {
+        // If no access key, perhaps redirect to login or show error
+        console.error("Access key not found in localStorage for dashboard.");
+        // showLoginSection(); // Example function to go back to login
+        return;
+      }
+
+      const deviceIdElement = document.getElementById('dashboardDeviceId');
+      if (deviceId && deviceIdElement) {
+        deviceIdElement.textContent = deviceId;
+      }
+
+      const validity = await fetchKeyValidity(accessKey); // Fetch validity for the stored key
+      const keyValidityElement = document.getElementById('keyValidity');
+      if (keyValidityElement) { // Check if element exists
+          keyValidityElement.textContent = validity;
+      }
+    }
+
+
+    function showGameSection() {
+      document.getElementById('dashboardSection').style.display = 'none';
+      document.getElementById('dashboardHeader').style.display = 'none';
+      document.getElementById('gameSection').style.display = 'block';
+      document.getElementById('gameHeader').style.display = 'block';
+
+      if (isServerOn) {
+        restoreGameState(); // Restore state when entering game
+        updatePrediction(); // Initial prediction
+      } else {
+        clearPredictionDisplay(); // If server is off, show offline state
+      }
+    }
+
+    // --- Game Mode Switching ---
+    function switchToBasicMode() {
+        document.getElementById('basicModeBtn').classList.remove('inactive');
+        document.getElementById('basicModeBtn').classList.add('active');
+        document.getElementById('proModeBtn').classList.remove('active');
+        document.getElementById('proModeBtn').classList.add('inactive');
+
+        document.getElementById('predictionCard').style.display = 'block';
+        document.getElementById('analysisCard').style.display = 'block';
+        document.getElementById('historyCard').style.display = 'block';
+        document.getElementById('patternCard').style.display = 'none';
+        document.getElementById('wingoResultsCard').style.display = 'none';
+    }
+
+    function switchToProMode() {
+        document.getElementById('proModeBtn').classList.remove('inactive');
+        document.getElementById('proModeBtn').classList.add('active');
+        document.getElementById('basicModeBtn').classList.remove('active');
+        document.getElementById('basicModeBtn').classList.add('inactive');
+
+        document.getElementById('predictionCard').style.display = 'block'; // Still show main prediction
+        document.getElementById('analysisCard').style.display = 'none'; // Hide basic analysis
+        document.getElementById('historyCard').style.display = 'none'; // Hide basic history
+        document.getElementById('patternCard').style.display = 'block'; // Show pro pattern analysis
+        document.getElementById('wingoResultsCard').style.display = 'block'; // Show Wingo results
+
+        fetchWingoResults(); // Fetch results for pro mode
+        // Potentially update other pro-mode specific displays here
+        // For example, populate patternCard if it has dynamic data
+    }
+
+
+    // --- Prediction Logic ---
+    function getOppositeNumber(prediction) {
+        const small = [0, 1, 2, 3, 4];
+        const big = [5, 6, 7, 8, 9];
+        let arr = prediction === "BIG" ? small : big;
+        return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function neuralNetworkPrediction(recent) {
+        if (recent.length === 0) return { prediction: Math.random() > 0.5 ? "BIG" : "SMALL", confidence: 0.5, logic: 19 };
+        const bigCount = recent.filter(r => r.resultType === "BIG").length;
+        const smallCount = recent.length - bigCount;
+
+        let lastType = recent[0].resultType;
+        let streakLength = 1;
+        for (let i = 1; i < recent.length; i++) {
+            if (recent[i].resultType === lastType) streakLength++;
+            else break;
+        }
+
+        if (streakLength >= 3) return { prediction: lastType === "BIG" ? "SMALL" : "BIG", confidence: 0.80, logic: 19 };
+        if (bigCount / recent.length > 0.6) return { prediction: "SMALL", confidence: 0.75, logic: 19 };
+        if (smallCount / recent.length > 0.6) return { prediction: "BIG", confidence: 0.75, logic: 19 };
+        return { prediction: bigCount > smallCount ? "SMALL" : "BIG", confidence: 0.70, logic: 19 };
+    }
+
+    function fibonacciPrediction(recent) {
+        if (recent.length === 0) return { prediction: Math.random() > 0.5 ? "BIG" : "SMALL", confidence: 0.5, logic: 25 };
+        const levels = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1];
+        const bigCount = recent.filter(r => r.resultType === "BIG").length;
+        const ratio = bigCount / recent.length;
+
+        if (ratio > 0.618) return { prediction: "SMALL", confidence: 0.75, logic: 25 };
+        if (ratio < 0.382) return { prediction: "BIG", confidence: 0.75, logic: 25 };
+        return { prediction: recent[0].resultType === "BIG" ? "SMALL" : "BIG", confidence: 0.70, logic: 25 };
+    }
+
+    function machineLearningPrediction(recent) {
+        if (recent.length === 0) return { prediction: Math.random() > 0.5 ? "BIG" : "SMALL", confidence: 0.5, logic: 28 };
+        const bigCount = recent.filter(r => r.resultType === "BIG").length;
+        const smallCount = recent.length - bigCount;
+
+        let lastType = recent[0].resultType;
+        let streakLength = 1;
+        for (let i = 1; i < recent.length; i++) {
+            if (recent[i].resultType === lastType) streakLength++;
+            else break;
+        }
+
+        let alternating = true;
+        for (let i = 1; i < Math.min(6, recent.length); i++) {
+            if ((recent[i-1].resultType === "BIG" && recent[i].resultType !== "SMALL") ||
+                (recent[i-1].resultType === "SMALL" && recent[i].resultType !== "BIG")) {
+                alternating = false;
+                break;
+            }
+        }
+
+        if (streakLength >= 3) return { prediction: lastType === "BIG" ? "SMALL" : "BIG", confidence: 0.85, logic: 28 };
+        if (alternating && recent.length >= 2) return { prediction: recent[0].resultType === "BIG" ? "SMALL" : "BIG", confidence: 0.80, logic: 28 }; // Predict opposite of last if alternating
+        if (bigCount / recent.length > 0.6) return { prediction: "SMALL", confidence: 0.78, logic: 28 };
+        if (smallCount / recent.length > 0.6) return { prediction: "BIG", confidence: 0.78, logic: 28 };
+        return { prediction: bigCount > smallCount ? "SMALL" : "BIG", confidence: 0.75, logic: 28 };
+    }
+
+
+    function enhancedTrendAnalysis(history) {
+        if (history.length < 3) {
+            // Default to random with base confidence if not enough data
+            return { prediction: Math.random() > 0.5 ? "BIG" : "SMALL", confidence: 0.35 + Math.random() * (0.65 - 0.35), logic: 0 };
+        }
+
+        let recentResults = history.filter(h => h.result !== "-" && h.resultType).slice(0, 5); // Ensure resultType exists
+        if (recentResults.length < 1) { // Need at least one result for logic
+             return { prediction: Math.random() > 0.5 ? "BIG" : "SMALL", confidence: 0.35 + Math.random() * (0.65 - 0.35), logic: 0 };
+        }
+
+
+        let predictions = [
+            neuralNetworkPrediction(recentResults),
+            fibonacciPrediction(recentResults),
+            machineLearningPrediction(recentResults)
+        ];
+
+        // Simple averaging or weighted averaging can be used. For now, pick best confidence.
+        let bestPrediction = predictions.reduce((best, current) => current.confidence > best.confidence ? current : best, predictions[0]);
+
+        // Apply win level adjustment
+        if (winLevel >= MAX_WIN_LEVEL) {
+            bestPrediction.prediction = bestPrediction.prediction === "BIG" ? "SMALL" : "BIG"; // Invert prediction
+            bestPrediction.confidence = Math.max(0.35, bestPrediction.confidence * 0.5); // Reduce confidence
+            // winLevel = 0; // Reset winLevel after applying, or it will stick
+            // console.log("Max win level reached, inverting prediction and reducing confidence.");
+        }
+        // console.log("Win Level:", winLevel, "Prediction:", bestPrediction.prediction, "Confidence:", bestPrediction.confidence);
+        return bestPrediction;
+    }
+
+
+    function autoPredict() {
+        let predictionResult = enhancedTrendAnalysis(historyData);
+        lastPrediction = predictionResult.prediction; // Store the chosen prediction
+
+        // Update UI element for active logic
+        const activeLogicElement = document.getElementById('activeLogic');
+        if (activeLogicElement) {
+            activeLogicElement.textContent = 'Logic ' + predictionResult.logic;
+        }
+
+        return {
+            type: predictionResult.prediction,
+            confidence: predictionResult.confidence
+        };
+    }
+
+    function updateLastStatus(actualNumber) {
+        const predictedType = lastPrediction; // Use the stored lastPrediction
+        const actualType = actualNumber >= 5 ? 'BIG' : 'SMALL';
+        const match = predictedType === actualType; // Simplified: direct match of BIG/SMALL
+
+        lastResult = actualNumber; // Store the actual number
+        lastStatus = match ? 'WIN' : 'LOSS';
+
+        if (match) {
+            winLevel = Math.min(winLevel + 1, MAX_WIN_LEVEL + 1); // Allow it to go one over to trigger reset *after* this win
+        } else {
+            winLevel = 0; // Reset on loss
+        }
+        // console.log(`Prediction: ${predictedType}, Actual: ${actualNumber} (${actualType}), Status: ${lastStatus}, WinLevel: ${winLevel}`);
+        return lastStatus;
+    }
+
+
+    async function fetchGameResult() {
+        try {
+            // Using a CORS proxy for development if direct API access is blocked by CORS
+            // const proxyUrl = 'https://cors-anywhere.herokuapp.com/'; // Example proxy
+            const apiUrl = "https://api.bdg88zf.com/api/webapi/GetNoaverageEmerdList";
+            let response = await fetch(apiUrl, { // Removed proxyUrl for direct attempt
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    pageSize: 10, // Fetch a few recent results
+                    pageNo: 1,
+                    typeId: 1, // Assuming '1' is for Wingo 1 Min
+                    language: 0, // Or appropriate language code
+                    random: "4a0522c6ecd8410496260e686be2a57c", // These might need to be dynamic or valid
+                    signature: "334B5E70A0C9B8918B0B15E517E2069C",
+                    timestamp: Math.floor(Date.now() / 1000)
+                })
+            });
+            if (!response.ok) {
+                console.error("API Error Status:", response.status, response.statusText);
+                const errorBody = await response.text();
+                console.error("API Error Body:", errorBody);
+                return null;
+            }
+            let data = await response.json();
+            return data?.data?.list || [];
+        } catch (e) {
+            console.error("API Fetch Error:", e);
+            return null;
+        }
+    }
+
+    async function fetchWingoResults() {
+        let results = await fetchGameResult();
+        if (!results || results.length === 0) {
+            showToast("Failed to fetch Wingo results or no results available.");
+            return;
+        }
+
+        const container = document.getElementById("wingoResultsContainer");
+        if (!container) return;
+
+        container.innerHTML = results.slice(0, 10).map(item => { // Display last 10
+            const number = Number(item.number);
+            const type = number >= 5 ? "BIG" : "SMALL";
+            const borderColor = type === "BIG" ? "border-blue-500" : "border-green-500";
+            return `
+            <div class="history-card flex justify-between items-center p-4 bg-gray-800 rounded-lg border-l-4 ${borderColor} shadow-md">
+                <div class="flex-1">
+                <div class="text-gray-400 text-sm"><i class="fas fa-calendar mr-2"></i>Period-${item.issueNumber.slice(-4)}</div>
+                <div class="text-white"><i class="fas fa-dice mr-2"></i>Number: ${number}</div>
+                <div class="text-white"><i class="fas fa-trophy mr-2"></i>Type: ${type}</div>
+                </div>
+            </div>`;
+        }).join("");
+    }
+
+    function showToast(message) {
+        const toast = document.createElement("div");
+        toast.className = "toast";
+        toast.innerText = message;
+        document.body.appendChild(toast);
+        // Trigger reflow to ensure animation plays
+        toast.offsetHeight;
+        toast.classList.add('show');
+
+        setTimeout(() => {
+            toast.classList.remove('show');
+            // Remove element after animation (optional, depends on CSS for hiding)
+            setTimeout(() => toast.remove(), 500);
+        }, 3000); // Show for 3 seconds
+    }
+
+
+    async function updatePrediction() {
+        if (!isServerOn) {
+            clearPredictionDisplay();
+            saveGameState(); // Save current (potentially offline) state
+            return;
+        }
+
+        let results = await fetchGameResult();
+        if (!results || results.length === 0) {
+            // console.log("No new results or API error, skipping update.");
+            // Optionally show a subtle indicator that data couldn't be fetched
+            return;
+        }
+
+        let currentResult = results[0]; // The most recent result from API
+
+        // If the latest period from API is the same as the last one we processed, do nothing.
+        if (currentResult.issueNumber === lastFetchedPeriod) {
+            // console.log("Data for period", currentResult.issueNumber, "already processed.");
+            return;
+        }
+
+        // --- Update previous pending prediction ---
+        if (historyData.length > 0 && historyData[0].resultStatus === "Pending") {
+            const pendingEntry = historyData[0];
+            // We need the result for the period *before* currentResult.issueNumber
+            // Find the result that matches pendingEntry.period (which is issueNumber.slice(-4))
+            const previousPeriodFull = currentResult.issueNumber; // This is the *current* period from API
+            // We need to find the result for the period that `pendingEntry` was for.
+            // The API gives latest first. So results[1] would be for the period before results[0] IF it exists.
+            // This logic assumes the API returns results in descending order of period.
+            let resultForPending = null;
+            // The `pendingEntry.period` is the one we made a prediction FOR.
+            // The `currentResult.issueNumber` is the period that JUST finished.
+            // So, `currentResult` IS the result for our `pendingEntry.period` if the numbers match up.
+            if (pendingEntry.period === currentResult.issueNumber.slice(-4)) {
+                 resultForPending = currentResult;
+            }
+
+
+            if (resultForPending) {
+                const actualNumber = Number(resultForPending.number);
+                const status = updateLastStatus(actualNumber); // updateLastStatus uses `lastPrediction` which was set when pendingEntry was created
+                const resultType = actualNumber >= 5 ? "BIG" : "SMALL";
+
+                pendingEntry.result = actualNumber;
+                pendingEntry.resultStatus = status;
+                pendingEntry.resultType = resultType;
+                pendingEntry.calculation = `Actual: ${actualNumber} (${resultType})`;
+
+                // Update UI for the now-resolved prediction
+                document.getElementById("resultStatus").innerText = `${status} (${actualNumber})`;
+                document.getElementById("resultStatus").style.color = status === "WIN" ? "var(--win-green)" : "var(--loss-red)";
+            } else {
+                // console.log("Could not find matching result for pending period:", pendingEntry.period);
+            }
+        }
+         // --- Make new prediction for the NEXT period ---
+        const aiDecision = autoPredict(); // This sets `lastPrediction` internally
+        // `lastPrediction` is now set by autoPredict for the upcoming period.
+        lastOppositeNumber = getOppositeNumber(lastPrediction); // Get opposite for the new `lastPrediction`
+        globalPrediction = lastPrediction; // globalPrediction also reflects this new prediction
+
+        let nextPeriodFull = (BigInt(currentResult.issueNumber) + 1n).toString();
+        let nextPeriodDisplay = nextPeriodFull.slice(-4); // For display
+
+        document.getElementById("periodDisplay").value = nextPeriodDisplay;
+        document.getElementById("predictionDisplay").innerText = globalPrediction;
+        document.getElementById("oppositeNumberDisplay").innerText = lastOppositeNumber;
+        const confidencePercent = Math.round(aiDecision.confidence * 100);
+        document.getElementById("confidenceDisplay").innerText = `${confidencePercent}%`;
+        document.getElementById("progressBarFill").style.width = `${confidencePercent}%`;
+         if (winLevel > MAX_WIN_LEVEL) { // If winLevel exceeded max (e.g., was 2, now 3 after a win)
+            winLevel = 0; // Reset it for the *next* prediction cycle
+            // console.log("Win level reset for next cycle.");
+        }
+
+
+        // Add new pending entry to history
+        historyData.unshift({
+            period: nextPeriodDisplay, // This is the period we are predicting FOR
+            prediction: globalPrediction,
+            oppositeNumber: lastOppositeNumber,
+            result: "-",
+            resultStatus: "Pending",
+            resultType: "-",
+            calculation: "Awaiting result..."
+        });
+
+        updateHistory(); // Refresh history display
+        updateStats();   // Refresh stats
+        lastFetchedPeriod = currentResult.issueNumber; // Mark this period as processed
+        saveGameState(); // Save the new state
+    }
+
+
+    function updateHistory() {
+        const container = document.getElementById("historyContainer");
+        if (!container) return;
+
+        container.innerHTML = historyData.slice(0, 20).map((item, index) => { // Show max 20 history items
+            let borderColor = "border-gray-500"; // Default for pending
+            let iconClass = "fas fa-spinner text-yellow-500 animate-spin"; // Default for pending
+            let resultText = "Waiting...";
+            let calculationText = item.calculation || "Awaiting result...";
+
+            if (item.resultStatus === "WIN") {
+                borderColor = "border-green-500";
+                iconClass = "fas fa-check-circle text-green-500 win-animation";
+                resultText = item.result;
+            } else if (item.resultStatus === "LOSS") {
+                borderColor = "border-red-500";
+                iconClass = "fas fa-xmark-circle text-red-500 loss-animation";
+                resultText = item.result;
+            }
+
+            return `
+            <div class="history-card flex justify-between items-center p-4 bg-gray-800 rounded-lg border-l-4 ${borderColor} shadow-md mb-2">
+                <div class="flex-1">
+                <div class="text-gray-400 text-sm"><i class="fas fa-calendar mr-2"></i>P-${item.period}</div>
+                <div class="text-white"><i class="fas fa-bullseye mr-2"></i>Prediction: ${item.prediction} (Opp: ${item.oppositeNumber})</div>
+                <div class="text-white"><i class="fas fa-dice mr-2"></i>Result: ${resultText}</div>
+                <div class="text-gray-400 text-xs"><i class="fas fa-calculator mr-2"></i>${calculationText}</div>
+                <div class="text-white font-semibold"><i class="fas fa-trophy mr-2"></i>Status: ${item.resultStatus}</div>
+                </div>
+                <div class="history-actions flex flex-col items-center gap-2 ml-2">
+                <i class="${iconClass} text-xl"></i>
+                <i class="fas fa-trash-alt text-gray-500 hover:text-red-500 cursor-pointer text-sm" onclick="deleteHistory(${index})"></i>
+                </div>
+            </div>`;
+        }).join("");
+    }
+
+    function updateStats() {
+        const wins = historyData.filter(item => item.resultStatus === "WIN").length;
+        const losses = historyData.filter(item => item.resultStatus === "LOSS").length;
+        const totalCompleted = wins + losses;
+        const accuracy = totalCompleted > 0 ? ((wins / totalCompleted) * 100).toFixed(2) : 0;
+
+        const winsEl = document.getElementById('wins');
+        const lossesEl = document.getElementById('losses');
+        const accuracyEl = document.getElementById('accuracy');
+        const winLevelEl = document.getElementById('winLevelDisplay');
+
+
+        if(winsEl) winsEl.textContent = wins;
+        if(lossesEl) lossesEl.textContent = losses;
+        if(accuracyEl) accuracyEl.textContent = `${accuracy}%`;
+        if(winLevelEl) winLevelEl.textContent = winLevel > MAX_WIN_LEVEL ? MAX_WIN_LEVEL : winLevel; // Display capped winLevel
+    }
+
+    function deleteHistory(index) {
+        historyData.splice(index, 1);
+        showToast("History entry deleted successfully");
+        updateHistory();
+        updateStats();
+        saveGameState();
+    }
+
+    function showClearHistoryModal() {
+        document.getElementById("clearHistoryModal").classList.remove("hidden");
+    }
+    function hideClearHistoryModal() {
+        document.getElementById("clearHistoryModal").classList.add("hidden");
+    }
+    function confirmClearHistory() {
+        clearHistory();
+        showToast("All history deleted successfully");
+        hideClearHistoryModal();
+    }
+
+    function clearHistory() {
+        historyData = [];
+        winLevel = 0;
+        // Reset other relevant state variables if needed, but keep lastFetchedPeriod to avoid reprocessing
+        // lastFetchedPeriod = null;
+        lastResult = null;
+        lastPrediction = null;
+        lastStatus = null;
+        lastOppositeNumber = null;
+        globalPrediction = null;
+
+        updateHistory();
+        updateStats();
+        saveGameState(); // Save the cleared state
+    }
+
+
+    // --- DOMContentLoaded ---
+    document.addEventListener('DOMContentLoaded', function() {
+      // console.log('DOM fully loaded and parsed');
+      startSparkleEffect(); // Call placeholder
+      checkServerStatus();  // Initial check
+      listenForCustomMessages(); // Start listening
+
+      const deviceIdSpan = document.getElementById('deviceId');
+      if (deviceIdSpan) {
+        deviceIdSpan.textContent = getDeviceId();
+        deviceIdSpan.addEventListener('click', copyDeviceId);
+        // For touch devices, touchend might be more reliable than click for actions like copy
+        deviceIdSpan.addEventListener('touchend', (e) => {
+            e.preventDefault(); // Prevent potential duplicate click event
+            copyDeviceId();
+        });
+      } else {
+        console.error('Device ID span element not found.');
+      }
+
+      const closeInvalidKeyBtn = document.getElementById('closeInvalidKeyBtn');
+      if (closeInvalidKeyBtn) {
+        closeInvalidKeyBtn.addEventListener('click', hideInvalidKeyPopup);
+      } else {
+        console.error('Close invalid key button not found.');
+      }
+
+      const closeAdminMessageBtn = document.getElementById('closeAdminMessageBtn');
+      if (closeAdminMessageBtn) {
+        closeAdminMessageBtn.addEventListener('click', () => {
+          hideAdminMessagePopup();
+          isShowingMessage = false; // Allow next message in queue to show
+          processMessageQueue();
+        });
+      } else {
+        console.error('Close admin message button not found.');
+      }
+
+      // Check if user was already logged in (e.g. page refresh in dashboard/game)
+      const storedKey = localStorage.getItem("accessKey_wingo");
+      if (storedKey && document.getElementById('loginSection').style.display !== 'none') {
+          // If a key is stored and we are on the login page, attempt to go to dashboard
+          // This simulates auto-login if the key is still valid.
+          // The login() function itself will validate the key against Firebase.
+          // document.getElementById("accessKey").value = storedKey; // Pre-fill for convenience
+          // login(); // This might be too aggressive, consider a "Continue session?" prompt
+          // For now, let's just populate dashboard if key exists.
+          // The login function handles the transition.
+          // If we are on login page, user needs to click login.
+          // If we want to auto-redirect, more logic is needed here or in login()
+      }
+
+
+      // Prediction update interval
+      setInterval(() => {
+        if (isServerOn && document.getElementById('gameSection').style.display === 'block') { // Only update if in game section
+          updatePrediction();
+        } else if (!isServerOn) {
+          clearPredictionDisplay(); // Ensure display is cleared if server goes offline
+        }
+      }, 30000); // Fetch new results every 30 seconds
+    });
+
+  </script>
+</body>
+</html>
