@@ -1,1645 +1,1581 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Wingo - Login & Dashboard</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&family=Poppins:wght@400;600;700&family=Orbitron:wght@500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <style>
-    :root {
-      --primary-color: #162C6E;
-      --accent-color: #F97316;
-      --accent-hover-color: #FDBA74;
-      --accent-color-rgb: 249, 115, 22;
-      --soft-black: #1a1a1a;
-      --light-black: #2d2d2d;
-      --light-gray: #d1d5db;
-      --purple: #7b3fe4;
-      --blue: #4361ee;
-      --win-green: #28a745;
-      --loss-red: #dc3545;
-      --neon-blue: #00f2ff;
-      --modal-bg: #f0f4f8;
-      --cyan: #00bcd4;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEWROX AI - Predictor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            /* Dark Theme Variables */
+            --predictor-primary-bg: #0F172A;   /* Body background */
+            --predictor-text-primary: #E2E8F0; /* Main text color */
+            --predictor-accent-color: #38BDF8;  /* Sky 400 - Lighter sky for dark bg */
+            --predictor-accent-hover: #0EA5E9; /* Sky 500 */
+            --predictor-card-bg: #1E293B;      /* Card background */
+            --predictor-border-color: #334155; /* Card border */
+            
+            --danger-color: #F87171;           /* Red 400 - Lighter red */
+            --success-color: #34D399;         /* Emerald 400 - Lighter green */
+            
+            /* Info box for Device ID display - adjusted for dark theme */
+            --info-bg-color: #1E293B;          /* Same as card for consistency or a slightly lighter dark shade e.g. #273349 */
+            --info-text-color: #94A3B8;        /* Slate 400 - Lighter gray for info text */
+            --info-border-color: #475569;      /* Slate 600 - Darker border for info box */
 
-    body {
-      font-family: 'El Messiri', sans-serif;
-      background-color: var(--primary-color);
-      color: #F3F4F6;
-      position: relative;
-      min-height: 100vh;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
+            /* Original Light theme variables (kept for reference, but overridden by dark theme)
+            --predictor-primary-bg-light: #f8fafc; 
+            --predictor-text-primary-light: #1e293b; 
+            --predictor-accent-color-light: #0ea5e9; 
+            --predictor-accent-hover-light: #0284c7;
+            --predictor-card-bg-light: #ffffff; 
+            --predictor-border-color-light: #e2e8f0; 
+            --danger-color-light: #ef4444; 
+            --success-color-light: #10b981; 
+            --info-bg-color-light: #e0f2fe; 
+            --info-text-color-light: #0c4a6e; 
+            --info-border-color-light: #7dd3fc; 
+            */
+        }
 
-    .floating-bg {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: -1;
-      overflow: hidden;
-    }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--predictor-primary-bg);
+            color: var(--predictor-text-primary);
+            margin-top: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
 
-    .floating-particle {
-      position: absolute;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.2);
-      animation: floatParticle 15s infinite ease-in-out;
-    }
-
-    @keyframes floatParticle {
-      0% { transform: translateY(100vh) scale(0.5); opacity: 0.2; }
-      50% { opacity: 0.5; }
-      100% { transform: translateY(-100vh) scale(1.5); opacity: 0; }
-    }
-
-    .card {
-      transition: all 0.3s ease;
-      background: rgba(31, 41, 55, 0.9);
-      border-radius: 16px;
-      border: 2px solid rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
-    }
-
-    .card:hover {
-      transform: translateY(-8px) scale(1.02);
-      box-shadow: 0 15px 30px rgba(var(--accent-color-rgb), 0.4);
-    }
-
-    .gradient-bg {
-      background: linear-gradient(135deg, var(--accent-color), var(--accent-hover-color));
-    }
-
-    svg.header-svg {
-      width: 70%;
-      height: auto;
-      overflow: visible;
-      margin: 0 auto;
-      display: block;
-    }
-
-    svg.header-svg text {
-      text-anchor: middle;
-      dominant-baseline: middle;
-      text-transform: uppercase;
-      animation: stroke 5s infinite alternate;
-      stroke-width: 1;
-      stroke: var(--accent-color);
-      font-size: 110px;
-      fill: rgba(255, 255, 255, 0);
-    }
-
-    @keyframes stroke {
-      0% { fill: rgba(255, 255, 255, 0); stroke: var(--accent-color); stroke-dashoffset: 25%; stroke-dasharray: 0 50%; stroke-width: 2; }
-      70% { fill: rgba(255, 255, 255, 0); stroke: var(--accent-hover-color); }
-      80% { fill: rgba(255, 255, 255, 0); stroke: var(--accent-color); stroke-width: 3; }
-      100% { fill: #F3F4F6; stroke: rgba(var(--accent-color-rgb), 0); stroke-dashoffset: -25%; stroke-dasharray: 50% 0; stroke-width: 0; }
-    }
-
-    @keyframes bounceIn {
-      0% { transform: scale(0.8); opacity: 0; }
-      60% { transform: scale(1.05); opacity: 1; }
-      100% { transform: scale(1); }
-    }
-
-    .popup {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.8);
-      z-index: 1000;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .popup-content {
-      display: flex;
-      flex-direction: column;
-      background: #1F2937;
-      padding: 2rem;
-      border-radius: 1rem;
-      box-shadow: 0 8px 16px rgba(var(--accent-color-rgb), 0.2);
-      border: 2px solid var(--accent-color);
-      text-align: center;
-      width: 90%;
-      max-width: 400px;
-      max-height: 80vh;
-      overflow-y: auto;
-    }
-
-    .popup.show {
-      display: flex;
-    }
-
-    .header-text {
-      color: var(--accent-color);
-    }
-
-    .subtle-border {
-      border: 1px solid #4B5563;
-    }
-
-    .bg-dark-card {
-      background: #1F2937;
-    }
-
-    .rupee-effect {
-      position: fixed;
-      color: var(--accent-color);
-      font-size: 2rem;
-      pointer-events: none;
-      z-index: 9999;
-      animation: rupeeFade 1s ease-out forwards;
-    }
-
-    @keyframes rupeeFade {
-      0% { opacity: 1; transform: scale(1); }
-      100% { opacity: 0; transform: scale(1.5) translateY(-20px); }
-    }
-
-    .popup-button {
-      padding: 0.5rem 1rem;
-      margin: 0.5rem;
-      border-radius: 0.5rem;
-      font-weight: bold;
-      transition: all 0.3s ease;
-      background: #808080; /* Default for non-confirm buttons */
-      color: #F3F4F6;
-    }
-
-    .popup-button:hover {
-      background: #A9A9A9; /* Default hover */
-    }
-
-    .confirm-btn { /* Specific style for confirm buttons */
-      background: var(--accent-color);
-      color: #F3F4F6;
-    }
-
-    .confirm-btn:hover {
-      background: var(--accent-hover-color);
-    }
-
-    .entry-btn {
-      width: 150px; /* Fixed width for entry button */
-      background: var(--accent-color); /* Ensure it uses accent color */
-    }
-    .entry-btn:hover {
-      background: var(--accent-hover-color);
-    }
+        /* Login Page Styles */
+        .login-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 90vh;
+            padding: 1rem;
+            animation: fadeInLogin 0.5s ease-out;
+        }
+        @keyframes fadeInLogin {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .login-container {
+            background-color: var(--predictor-card-bg);
+            padding: 2rem 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); /* Slightly more pronounced shadow for dark bg */
+            width: 100%;
+            max-width: 420px; 
+            text-align: center;
+            border: 1px solid var(--predictor-border-color);
+        }
+        .login-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--predictor-accent-color);
+            margin-bottom: 0.5rem;
+        }
+        .login-subtitle {
+            font-size: 0.9rem;
+            color: #94A3B8; /* Slate 400 for dark theme */
+            margin-bottom: 1.5rem;
+        }
+        .device-id-display-container {
+            background-color: var(--info-bg-color);
+            border: 1px solid var(--info-border-color);
+            color: var(--info-text-color);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            text-align: left;
+            font-size: 0.8rem;
+        }
+        .device-id-display-container p { margin: 0.25rem 0; }
+        .device-id-display-container strong {
+            font-size: 1.2em; /* Further increased font size for Device ID */
+            font-weight: 700; /* Bolder */
+            user-select: all; 
+            cursor: pointer;
+            padding: 0.2rem 0.4rem; /* More padding */
+            background-color: #334155; /* Darker background for ID on info box */
+            color: #E2E8F0; /* Light text for ID */
+            border-radius: 4px;
+            word-break: break-all;
+            display: inline-block; 
+        }
+        .copy-device-id-btn {
+            background: none;
+            border: none;
+            color: var(--predictor-accent-color);
+            cursor: pointer;
+            font-size: 0.9em;
+            margin-left: 0.5rem;
+            padding: 0.2rem;
+        }
+        .copy-device-id-btn:hover { color: var(--predictor-accent-hover); }
+        .copy-feedback-inline {
+            font-size: 0.75em;
+            color: var(--success-color);
+            margin-left: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .login-status-message { 
+            font-size: 0.9rem; 
+            margin-top: 1.5rem; 
+            min-height: 1.25rem;
+            font-weight: 500;
+            color: var(--predictor-text-primary); 
+        }
+        .login-status-message.error {
+            color: var(--danger-color);
+        }
+        .login-status-message.success {
+            color: var(--success-color);
+        }
+        .login-status-message.info {
+            color: var(--predictor-accent-color);
+        }
 
 
-    .input-field {
-      background: #374151;
-      border: 1px solid var(--accent-color);
-      color: #F3F4F6;
-      padding: 0.75rem;
-      border-radius: 0.5rem;
-      width: 100%;
-      outline: none;
-      transition: all 0.3s ease;
-    }
+        .login-footer-link {
+            margin-top: 1.5rem;
+            font-size: 0.8rem;
+            color: #94A3B8; /* Slate 400 */
+        }
+        .login-footer-link a {
+            color: var(--predictor-accent-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .login-footer-link a:hover {
+            text-decoration: underline;
+        }
 
-    .input-field:focus {
-      border-color: var(--accent-hover-color);
-      box-shadow: 0 0 8px rgba(var(--accent-color-rgb), 0.3);
-    }
+        /* Predictor Content Styles */
+        .predictor-app-container {
+            display: none; /* Hidden by default */
+            flex-grow: 1;
+            padding-bottom: 70px; /* Space for nav bar */
+        }
 
-    .display-box {
-        background: #374151;
-        border: 1px solid var(--accent-color);
-        color: #F3F4F6;
-        padding: 0.75rem;
-        border-radius: 0.5rem;
-        width: 100%;
-        pointer-events: none; /* Make it non-editable */
-    }
+        .nav-bar-bottom {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background-color: #1E293B; /* Darker nav bar */
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.25); /* Adjusted shadow */
+            display: flex; justify-content: space-around;
+            padding: 0.4rem 0.2rem; z-index: 100;
+            border-top: 1px solid var(--predictor-border-color);
+        }
+        .nav-button {
+            flex-grow: 1; text-align: center; padding: 0.5rem 0.2rem;
+            border-radius: 0.375rem; font-weight: 500; font-size: 0.7rem;
+            line-height: 1; transition: all 0.2s ease-in-out; cursor: pointer;
+            border: 1px solid transparent; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; color: #94A3B8; /* Lighter text for nav items */
+        }
+        .nav-button i { font-size: 0.9rem; margin-bottom: 0.15rem; }
+        .nav-button.active { color: var(--predictor-accent-color); background-color: #0F172A; } /* Darker active bg */
+        .nav-button:not(.active):hover { background-color: #273349; color: var(--predictor-accent-hover); }
 
+        .page { display: none; }
+        .page.active { display: block; animation: fadeInPage 0.3s ease-out; }
+        @keyframes fadeInPage {
+            from { opacity: 0.8; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-    .copy-feedback {
-      display: none;
-      background: #1F2937;
-      color: #34D399;
-      font-size: 0.9rem;
-      margin-top: 0.5rem;
-      padding: 0.25rem 0.5rem;
-      border-radius: 0.5rem;
-      border: 1px solid var(--accent-color);
-      animation: slideIn 0.5s ease-in-out;
-    }
-
-    .copy-feedback.show {
-      display: block;
-    }
-
-    .device-id {
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    .device-id:hover {
-      color: var(--accent-hover-color);
-    }
-
-    .toast {
-        display: none;
-        position: fixed;
-        bottom: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: #1F2937;
-        color: #F3F4F6;
-        padding: 1rem 1.5rem;
-        border-radius: 0.5rem;
-        box-shadow: 0 4px 8px rgba(var(--accent-color-rgb), 0.2);
-        border: 1px solid var(--accent-color);
-        z-index: 1000;
-        max-width: 300px;
-        animation: slideIn 0.5s ease-in-out;
-    }
-
-    .toast.show {
-        display: block;
-    }
-
-    @keyframes slideIn {
-        0% { transform: translateY(100%); opacity: 0; }
-        100% { transform: translateY(0); opacity: 1; }
-    }
-
-
-    #adminMessagePopup {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.8);
-        z-index: 1000;
-        justify-content: center;
-        align-items: center;
-    }
-
-    #adminMessagePopup.show {
-        display: flex;
-    }
-
-    #adminMessageContent {
-        display: flex;
-        flex-direction: column;
-        background: #1F2937;
-        padding: 2rem;
-        border-radius: 1rem;
-        box-shadow: 0 8px 16px rgba(var(--accent-color-rgb), 0.2);
-        border: 2px solid var(--accent-color);
-        text-align: center;
-        width: 90%;
-        max-width: 400px;
-        max-height: 80vh;
-        overflow-y: auto;
-    }
+        .popup, .modal {
+            display: none; position: fixed; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); background: var(--predictor-card-bg); /* Use card bg for popups */
+            padding: 1.25rem; border-radius: 0.625rem; 
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15), 0 4px 8px rgba(0,0,0,0.1);
+            z-index: 1000; border: 1px solid var(--predictor-border-color);
+            width: 90%; max-width: 340px;
+            color: var(--predictor-text-primary); /* Ensure text color in popups is readable */
+        }
+        .card {
+            transition: all 0.25s ease; background: var(--predictor-card-bg);
+            border-radius: 0.625rem; border: 1px solid var(--predictor-border-color);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1); /* Adjusted shadow for dark cards */
+        }
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 10px rgba(0,0,0,0.15);
+        }
+        .premium-badge {
+            padding: 0.2rem 0.5rem; border-radius: 9999px;
+            font-size: 0.65rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.04em; line-height: 1;
+        }
+        /* Badge colors might need adjustment for dark theme contrast if they were light before */
+        .badge-win { background-color: #10B981; color: #064E3B; border: 1px solid #059669;} 
+        .badge-loss { background-color: #F87171; color: #7F1D1D; border: 1px solid #DC2626;}
+        .badge-pending { background-color: #FDBA74; color: #7C2D12; border: 1px solid #F97316;}
+        .badge-api-result { background-color: #A5B4FC; color: #312E81; border: 1px solid #6366F1; }
 
 
-    /* Game Section Specific Animations */
-    @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); opacity: 0.9; } }
-    @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
-    @keyframes dash { 0% { stroke-dashoffset: 500; } 100% { stroke-dashoffset: 0; } }
-    @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-5px); } }
-    @keyframes win-bounce { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
-    @keyframes loss-shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 50% { transform: translateX(5px); } 75% { transform: translateX(-5px); } }
-    @keyframes letter-glow { 0%, 100% { text-shadow: 0 0 5px var(--neon-blue), 0 0 10px var(--neon-blue), 0 0 15px var(--neon-blue); } 50% { text-shadow: 0 0 10px var(--neon-blue), 0 0 20px var(--neon-blue), 0 0 30px var(--neon-blue); } }
-    @keyframes title-pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.8; } }
-    @keyframes toast-slide { 0% { bottom: -50px; opacity: 0; } 10% { bottom: 20px; opacity: 1; } 90% { bottom: 20px; opacity: 1; } 100% { bottom: -50px; opacity: 0; } }
-    @keyframes button-glow { 0%, 100% { box-shadow: 0 0 5px var(--loss-red), 0 0 10px var(--loss-red); } 50% { box-shadow: 0 0 10px var(--loss-red), 0 0 20px var(--loss-red); } }
-    @keyframes modal-fade-in { 0% { opacity: 0; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1); } }
+        .animated-title-svg {
+            width: 100%; max-width: 280px; height: auto;
+            overflow: visible; margin: 0 auto; display: block;
+        }
+        .animated-title-svg text {
+            text-anchor: middle; dominant-baseline: middle; text-transform: uppercase;
+            animation: strokeTitleDark 5s infinite alternate; stroke-width: 1;
+            stroke: var(--predictor-accent-color); font-size: 44px; font-weight: 700;
+            fill: rgba(14, 165, 233, 0.1); /* Start with a subtle fill */
+        }
+        @keyframes strokeTitleDark { /* Adjusted for dark theme */
+            0% { fill: rgba(14,165,233,0.1); stroke: var(--predictor-accent-color); stroke-dashoffset: 25%; stroke-dasharray: 0 50%; stroke-width: 1.5; }
+            70% { fill: rgba(14,165,233,0.2); stroke: #38bdf8; } 
+            80% { fill: rgba(14,165,233,0.3); stroke: #7dd3fc; stroke-width: 2; } 
+            100% { fill: var(--predictor-accent-color); stroke: rgba(14,165,233,0.5); stroke-dashoffset: -25%; stroke-dasharray: 50% 0; stroke-width: 0; }
+        }
 
-    .win-animation { animation: win-bounce 0.6s ease-in-out infinite; }
-    .loss-animation { animation: loss-shake 0.5s ease-in-out infinite; }
-    .title-animation { animation: title-pulse 2s ease-in-out infinite; }
-    .letter-glow { animation: letter-glow 1.5s ease-in-out infinite; }
-    .button-glow { animation: button-glow 1.5s ease-in-out infinite; }
-    .modal-fade-in { animation: modal-fade-in 0.3s ease-in-out; }
+        .history-item { transition: all 0.2s ease-in-out; border-left-width: 3px; }
+        .history-item:hover { background-color: #273349; transform: translateX(3px); box-shadow: 1px 1px 6px rgba(0,0,0,0.08); } /* Darker hover */
+        .history-item-win { border-color: var(--success-color); }
+        .history-item-loss { border-color: var(--danger-color); }
+        .history-item-pending { border-color: #f97316; } 
 
-    /* Modal Styles */
-    .modal-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 1000; /* Ensure modal is on top */
-    }
-    .modal-content { /* Re-styling for consistency with other popups */
-        background: #1F2937;
-        padding: 2rem;
-        border-radius: 1rem;
-        box-shadow: 0 8px 16px rgba(var(--accent-color-rgb), 0.2);
-        border: 2px solid var(--accent-color);
-        text-align: center;
-        width: 90%;
-        max-width: 350px; /* Slightly wider for modal content */
-    }
-    .modal-title {
-        color: var(--accent-color); /* Use accent color for title */
-        font-size: 1.5rem;
-        font-weight: 600;
-        margin-bottom: 1rem;
-    }
-    .modal-message {
-        color: #F3F4F6; /* Light text for message */
-        font-size: 1rem;
-        margin-bottom: 1.5rem;
-    }
-    .modal-buttons {
-        display: flex;
-        justify-content: space-around;
-        gap: 1rem;
-    }
-    .modal-button { /* General modal button style */
-        padding: 0.5rem 1.5rem; /* Consistent padding */
-        border-radius: 0.5rem;
-        font-weight: bold;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        color: #F3F4F6;
-    }
-    .modal-button.yes {
-        background-color: var(--accent-color);
-    }
-    .modal-button.yes:hover {
-        background-color: var(--accent-hover-color);
-    }
-    .modal-button.no {
-        background-color: #4B5563; /* Darker gray for 'No' */
-    }
-    .modal-button.no:hover {
-        background-color: #6B7280; /* Lighter gray on hover */
-    }
+        .delete-btn { color: #94A3B8; transition: all 0.15s ease; } 
+        .delete-btn:hover { color: var(--danger-color); transform: scale(1.05); }
 
-    /* Pattern Box Styles (Pro Mode) */
-    .pattern-box {
-        background: rgba(55, 65, 81, 0.8);
-        border: 1px solid var(--accent-color);
-        border-radius: 0.5rem;
-        padding: 1rem;
-        margin-top: 1rem;
-    }
-    .pattern-item {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 0.5rem;
-    }
-    .pattern-label { color: var(--light-gray); }
-    .pattern-value { color: var(--neon-blue); font-weight: bold; }
+        .primary-button {
+            background-color: var(--predictor-accent-color); color: #0F172A; /* Dark text on light accent */
+            padding: 0.4rem 0.8rem; 
+            border-radius: 0.375rem; font-weight: 500; font-size: 0.8rem;
+            transition: background-color 0.15s ease, box-shadow 0.15s ease;
+            box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
+        }
+        .primary-button:hover { background-color: var(--predictor-accent-hover); box-shadow: 0 1px 3px -1px rgba(0,0,0,0.06); }
+        
+        .secondary-button {
+            background-color: #334155; color: #E2E8F0; padding: 0.4rem 0.8rem; /* Darker button, light text */
+            border-radius: 0.375rem; font-weight: 500; font-size: 0.8rem;
+            transition: background-color 0.15s ease;
+        }
+        .secondary-button:hover { background-color: #475569; } 
+        
+        #apiStatus { font-size: 0.75rem; padding: 0.2rem 0.4rem; border-radius: 0.25rem; transition: opacity 0.5s ease-out; }
+        /* API Status text colors for dark theme */
+        #apiStatus.bg-yellow-100 { background-color: #FDE68A !important; color: #713F12 !important; } /* Amber 200, Amber 800 */
+        #apiStatus.bg-red-100 { background-color: #FECACA !important; color: #7F1D1D !important; } /* Red 200, Red 800 */
+        #apiStatus.bg-green-100 { background-color: #A7F3D0 !important; color: #047857 !important; } /* Emerald 200, Emerald 700 */
 
-    /* Mode Buttons */
-    .mode-buttons {
-        display: flex;
-        justify-content: center;
-        gap: 1rem;
-        margin-bottom: 1rem;
-    }
-    .mode-button {
-        padding: 0.5rem 2rem;
-        border-radius: 0.5rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        border: 1px solid var(--accent-color);
-    }
-    .mode-button.active {
-        background-color: var(--accent-color);
-        color: white;
-    }
-    .mode-button.inactive {
-        background-color: #374151;
-        color: #F3F4F6;
-    }
-    .mode-button:hover {
-        background-color: var(--accent-hover-color);
-        color: white;
-    }
 
-  </style>
+        /* Global Message Bar */
+        #globalMessageBar {
+            display: none; 
+            background-color: var(--predictor-accent-color);
+            color: #0F172A; /* Dark text on light accent */
+            text-align: center;
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            position: sticky; 
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1001; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        #globalMessageBar p { margin: 0; }
+    </style>
 </head>
 <body>
-  <div class="floating-bg" id="floatingBg"></div>
 
-  <div id="adminMessagePopup" class="popup">
-    <div id="adminMessageContent" class="popup-content">
-      <p id="adminPopupMessage" class="text-lg font-semibold mb-4 text-white"></p>
-      <div class="flex justify-center">
-        <button id="closeAdminMessageBtn" class="popup-button confirm-btn">Close</button>
-      </div>
+    <div id="loginScreen" class="login-screen">
+        <div class="login-container">
+            <svg class="animated-title-svg mx-auto mb-1" viewBox="0 0 400 100" style="max-width: 200px;">
+                <text x="50%" y="50%">NEWROX AI</text>
+            </svg>
+            <h1 class="login-title">Predictor Access</h1>
+            <p class="login-subtitle">Your unique Device ID is shown below.</p>
+            
+            <div id="deviceIdDisplayContainer" class="device-id-display-container">
+                <p>Your Unique Device ID:</p>
+                <p><strong id="generatedDeviceIdElement">Loading...</strong>
+                   <button id="copyGeneratedIdBtn" class="copy-device-id-btn" title="Copy Device ID">
+                       <i class="fas fa-copy"></i>
+                   </button>
+                   <span id="copyGeneratedIdFeedback" class="copy-feedback-inline" style="display:none;">Copied!</span>
+                </p>
+                <p class="text-xs mt-1">Provide this ID to the admin for access. The app will check for approval automatically.</p>
+            </div>
+            
+            <div id="loginStatusMessage" class="login-status-message">
+                <i class="fas fa-spinner fa-spin mr-2"></i>Initializing...
+            </div>
+
+            <p class="login-footer-link">
+                Need Access? Contact <a href="https://t.me/NEWROXAI" target="_blank" rel="noopener noreferrer">Support</a>.
+            </p>
+        </div>
     </div>
-  </div>
 
-  <div id="invalidKeyPopup" class="popup">
-    <div class="popup-content">
-      <p id="errorMessage" class="text-lg font-semibold mb-4 text-white"></p>
-      <div class="flex justify-center">
-        <button id="closeInvalidKeyBtn" class="popup-button confirm-btn">Close</button>
-      </div>
-    </div>
-  </div>
+    <div id="predictorAppContainer" class="predictor-app-container">
+        <div id="globalMessageBar"><p id="globalMessageText"></p></div>
 
-  <div id="maintenancePopup" class="popup">
-    <div class="popup-content">
-      <p class="text-lg font-semibold mb-4 text-white">Server Under Maintenance</p>
-      <p class="text-white mb-4">Please try again later.</p>
-      </div>
-  </div>
+        <header class="text-center mb-3 mt-1 w-full max-w-md mx-auto">
+            <svg class="animated-title-svg" viewBox="0 0 400 100">
+                <text x="50%" y="50%">NEWROX AI</text>
+            </svg>
+            <div id="apiStatusContainer" class="text-center text-xs h-6 flex items-center justify-center">
+                 <span id="apiStatus" class="bg-slate-700 text-slate-300 opacity-0">Status: Idle</span> </div>
+        </header>
 
+        <main class="w-full max-w-xl mx-auto mb-3 px-2 sm:px-0">
+            <div id="page-main" class="page active">
+                <div class="grid grid-cols-1 gap-3">
+                    <div class="card p-3 bg-gradient-to-br from-sky-600 to-cyan-500 text-white shadow-lg"> <h2 class="text-md font-semibold mb-1.5 text-sky-200">Prediction Focus</h2>
+                        <div class="grid grid-cols-2 gap-2.5 items-center">
+                            <div>
+                                <div class="flex items-center space-x-1 mb-0.5">
+                                    <i class="fas fa-calendar-alt text-sm text-sky-300"></i>
+                                    <h3 class="text-xs font-medium text-sky-300 uppercase tracking-wide">Period</h3>
+                                </div>
+                                <p id="currentPeriod" class="text-xl font-bold bg-slate-700/50 p-2 rounded-md text-center">-</p>
+                            </div>
+                            <div>
+                                <div class="flex items-center space-x-1 mb-0.5">
+                                    <i class="fas fa-bullseye text-sm text-sky-300"></i>
+                                    <h3 class="text-xs font-medium text-sky-300 uppercase tracking-wide">Next AI Pick</h3>
+                                </div>
+                                <p id="currentPrediction" class="text-xl font-bold bg-slate-700/50 p-2 rounded-md text-center">-</p>
+                            </div>
+                        </div>
+                         <div class="mt-2.5 text-center">
+                            <p class="text-xs text-sky-200 uppercase tracking-wide">Last Game Result:</p>
+                            <div class="flex items-center justify-center space-x-1.5 mt-0.5">
+                                <p id="currentResult" class="text-md font-semibold">-</p>
+                                <span id="resultIcon" class="text-lg"></span>
+                            </div>
+                        </div>
+                         <div class="mt-1.5 text-center">
+                            <p class="text-xs text-sky-200 uppercase tracking-wide">Active Logic: <span id="activeLogicDisplay" class="font-medium capitalize">-</span></p>
+                        </div>
+                    </div>
 
-  <header id="loginHeader" class="text-center mt-0 mb-2">
-    <svg viewBox="0 0 800 200" class="header-svg">
-      <text x="50%" y="50%" class="header-text">DORAEMON LOGIN</text>
-    </svg>
-  </header>
-
-  <div id="loginSection" class="max-w-full mx-auto p-4 w-full relative">
-    <div class="max-w-md mx-auto p-5 w-full">
-      <div class="card mb-5 overflow-hidden gradient-bg">
-        <div class="bg-dark-card bg-opacity-90 p-5 rounded-lg subtle-border">
-          <h2 class="text-2xl font-bold text-orange-500 text-center mb-6">
-            Login
-          </h2>
-          <div class="space-y-4">
-            <div class="animate-bounceIn">
-              <label for="accessKey" class="block text-orange-400 text-sm mb-1">Access Key</label>
-              <input id="accessKey" type="text" class="input-field" placeholder="Enter Access Key">
+                    <div class="card p-3">
+                        <h2 class="text-md font-semibold text-slate-300 text-center mb-3 relative"> <span class="relative z-10 bg-inherit px-1.5">Analysis Dashboard</span> <span class="absolute top-1/2 left-0 w-full h-px bg-slate-700 -translate-y-1/2"></span> </h2>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                            <div class="bg-sky-700/30 p-2.5 rounded-md text-center card border-sky-600/50">
+                                <p class="text-sky-400 text-[0.65rem] font-medium uppercase">Most Freq.</p>
+                                <p id="mostFrequent" class="text-lg font-bold text-sky-300">-</p>
+                            </div>
+                            <div class="bg-sky-700/30 p-2.5 rounded-md text-center card border-sky-600/50">
+                                <p class="text-sky-400 text-[0.65rem] font-medium uppercase">Least Freq.</p>
+                                <p id="leastFrequent" class="text-lg font-bold text-sky-300">-</p>
+                            </div>
+                            <div class="bg-green-700/30 p-2.5 rounded-md text-center card border-green-600/50">
+                                <p class="text-green-400 text-[0.65rem] font-medium uppercase">Win Rate</p>
+                                <p id="winRate" class="text-lg font-bold text-green-300">-</p>
+                            </div>
+                            <div class="bg-green-700/30 p-2.5 rounded-md text-center card border-green-600/50">
+                                <p class="text-green-400 text-[0.65rem] font-medium uppercase">Wins</p>
+                                <p id="totalWinBets" class="text-lg font-bold text-green-300">-</p>
+                            </div>
+                            <div class="bg-red-700/30 p-2.5 rounded-md text-center card border-red-600/50">
+                                <p class="text-red-400 text-[0.65rem] font-medium uppercase">Losses</p>
+                                <p id="totalLossBets" class="text-lg font-bold text-red-300">-</p>
+                            </div>
+                             <div class="bg-slate-700/30 p-2.5 rounded-md card border-slate-600/50">
+                                <p class="text-slate-400 text-[0.65rem] font-medium uppercase text-center">AI Win Level</p>
+                                <p id="localWinLevelDisplay" class="text-lg font-bold text-slate-300 text-center">-</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="text-center animate-bounceIn" style="animation-delay: 0.1s;">
-              <button onclick="login()" class="popup-button confirm-btn w-32 mx-auto flex items-center justify-center">
-                <i class="fas fa-sign-in-alt mr-2"></i>Login
-              </button>
+
+            <div id="page-history" class="page">
+                 <div class="card p-3">
+                    <div class="flex flex-col sm:flex-row justify-between items-center mb-3 gap-2">
+                        <h2 class="text-md font-semibold text-slate-300">Prediction History</h2>
+                        <button id="clearHistoryBtn" class="primary-button w-full sm:w-auto text-xs">
+                            <i class="fas fa-trash-alt mr-1"></i>Clear All
+                        </button>
+                    </div>
+                    <div id="historyContainer" class="space-y-1.5 max-h-[65vh] sm:max-h-[70vh] overflow-y-auto pr-0.5">
+                        <p class="text-slate-400 text-center py-5 text-sm">No history yet, or history is loading...</p>
+                    </div>
+                </div>
             </div>
-            <div class="animate-bounceIn text-center" style="animation-delay: 0.2s;">
-              <p class="block text-orange-400 text-sm mb-1">Device ID (Tap to Copy)</p>
-              <span id="deviceId" class="device-id text-white font-semibold"></span>
-              <p id="copyFeedback" class="copy-feedback">Copied!</p>
+
+            <div id="page-about" class="page">
+                <div class="card p-3 md:p-5">
+                    <h2 class="text-lg font-bold text-sky-400 mb-3 text-center">About NEWROX AI</h2>
+                    <div class="space-y-2.5 text-slate-300 leading-relaxed text-xs sm:text-sm">
+                        <p>Welcome to NEWROX AI, your advanced prediction assistant! This tool analyzes patterns to provide insights for informed decisions.</p>
+                        <p><strong>How it Works:</strong> The system processes game data, identifies trends, and generates predictions using a proprietary algorithm. The Analysis Dashboard offers key statistics.</p>
+                        <p><strong>Features:</strong> Real-time Predictions, Detailed History, Statistical Analysis, User-Friendly Interface.</p>
+                        <p>This predictor learns from past results. However, all predictions are probabilistic and not guaranteed. Use responsibly.</p>
+                        <p><strong>Disclaimer:</strong> For informational and entertainment purposes only. Not financial advice. Use your discretion.</p>
+                        <div class="mt-5 text-center">
+                            <p class="text-sm font-semibold text-slate-300">Support & Questions?</p>
+                            <a href="https://t.me/NEWROXAI" target="_blank" rel="noopener noreferrer" class="mt-1 inline-block primary-button text-xs">
+                                <i class="fab fa-telegram-plane mr-1"></i> Contact @NEWROXAI
+                            </a>
+                        </div>
+                    </div>
+                     <button id="predictorLogoutBtn" class="secondary-button w-full mt-6 text-sm">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Logout from Predictor
+                    </button>
+                </div>
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+        </main>
 
-  <header id="dashboardHeader" class="text-center mt-0 mb-2" style="display: none;">
-    <svg viewBox="0 0 800 200" class="header-svg">
-      <text x="50%" y="50%" class="header-text">DASHBOARD</text>
-    </svg>
-  </header>
+        <nav class="nav-bar-bottom">
+            <button class="nav-button active" data-page="main"> <i class="fas fa-chart-line"></i> <span>Predict</span> </button>
+            <button class="nav-button" data-page="history"> <i class="fas fa-history"></i> <span>History</span> </button>
+            <button class="nav-button" data-page="about"> <i class="fas fa-info-circle"></i> <span>About</span> </button>
+        </nav>
 
-  <div id="dashboardSection" class="max-w-full mx-auto p-4 w-full" style="display: none;">
-    <div class="max-w-md mx-auto p-5 w-full">
-      <div class="card mb-5 overflow-hidden gradient-bg">
-        <div class="bg-dark-card bg-opacity-90 p-5 rounded-lg subtle-border">
-          <h2 class="text-2xl font-bold text-orange-500 text-center mb-6">
-            Dashboard
-          </h2>
-          <div class="space-y-4">
-            <div class="animate-bounceIn">
-              <p class="block text-orange-400 text-sm mb-1">Access Key</p>
-              <div id="dashboardAccessKey" class="display-box"></div>
+        <div id="winRatePopup" class="popup">
+            <div class="text-center">
+                <i class="fas fa-trophy text-3xl text-yellow-400 mb-2.5"></i>
+                <h2 class="text-lg font-bold mb-1 text-slate-300">Great Job!</h2>
+                <p class="text-slate-400 text-xs">60% win rate achieved after 15 bets!<br>Consider taking a break.</p>
+                <button id="closeWinPopupBtn" class="mt-3 secondary-button w-full text-xs">Close</button>
             </div>
-            <div class="animate-bounceIn" style="animation-delay: 0.1s;">
-              <p class="block text-orange-400 text-sm mb-1">Device ID</p>
-              <div id="dashboardDeviceId" class="display-box"></div>
+        </div>
+
+        <div id="clearHistoryModal" class="modal">
+            <div class="text-center">
+                <i class="fas fa-exclamation-triangle text-3xl text-amber-500 mb-2.5"></i>
+                <h2 class="text-lg font-bold mb-1 text-slate-300">Confirm Clear History</h2>
+                <p class="text-slate-400 text-xs mb-3">Are you sure? This action cannot be undone.</p>
+                <div class="flex justify-center space-x-2">
+                    <button id="confirmClear" class="primary-button bg-red-600 hover:bg-red-700 flex-1 text-xs">
+                        <i class="fas fa-trash-alt mr-0.5"></i> Yes, Clear
+                    </button>
+                    <button id="cancelClear" class="secondary-button flex-1 text-xs">
+                        <i class="fas fa-times mr-0.5"></i> No, Cancel
+                    </button>
+                </div>
             </div>
-            <div class="animate-bounceIn" style="animation-delay: 0.2s;">
-              <p class="block text-orange-400 text-sm mb-1">Key Validity</p>
-              <div id="keyValidity" class="display-box"></div>
-            </div>
-            <div class="text-center animate-bounceIn" style="animation-delay: 0.3s;">
-              <button onclick="showGameSection()" class="popup-button confirm-btn entry-btn mx-auto flex items-center justify-center">
-                <i class="fas fa-link mr-2"></i>Entry
-              </button>
-            </div>
-          </div>
         </div>
-      </div>
-    </div>
-  </div>
+    </div> <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
 
-
-  <header id="gameHeader" class="text-center mt-0 mb-2" style="display: none;">
-    <svg viewBox="0 0 800 200" class="header-svg">
-      <text x="50%" y="50%" class="header-text title-animation">
-        <tspan class="letter-glow">D</tspan><tspan class="letter-glow">O</tspan><tspan class="letter-glow">R</tspan><tspan class="letter-glow">A</tspan><tspan class="letter-glow">E</tspan><tspan class="letter-glow">M</tspan><tspan class="letter-glow">O</tspan><tspan class="letter-glow">N</tspan><tspan class="letter-glow">-</tspan><tspan class="letter-glow">A</tspan><tspan class="letter-glow">I</tspan>
-      </text>
-    </svg>
-  </header>
-
-  <div id="gameSection" class="max-w-full mx-auto p-4 w-full" style="display: none;">
-    <div class="container mx-auto max-w-md p-5">
-      <div class="mode-buttons">
-        <button id="basicModeBtn" class="mode-button active" onclick="switchToBasicMode()">Basic</button>
-        <button id="proModeBtn" class="mode-button inactive" onclick="switchToProMode()">Pro</button>
-      </div>
-
-      <div id="predictionCard" class="card bg-gray-900 rounded-xl p-5 mb-5 shadow-lg border border-gray-700 animate-[float_6s_infinite_ease-in-out]">
-        <div class="section-title text-lg font-semibold text-blue-400 mb-4 animate-[pulse_3s_infinite_ease-in-out]">
-          <i class="fas fa-brain mr-2"></i> Period & Prediction
-        </div>
-        <div class="period-label text-gray-400 font-bold mb-2 flex items-center">
-          <i class="fas fa-calendar-days mr-2 text-purple-500"></i> Period
-        </div>
-        <input type="text" id="periodDisplay" value="-" readonly class="w-full p-3 mb-2 border-2 border-purple-500 rounded-lg bg-gray-800 text-center text-white" />
-        <div class="result-box relative text-center p-4 rounded-lg bg-gray-800 border border-blue-500 mb-2">
-          <div class="text-gray-400 mb-2">Result: <span id="resultStatus">-</span></div>
-          <div class="text-2xl font-bold text-blue-400" id="predictionDisplay">-</div>
-          <div class="text-gray-400 mt-2">Opposite Number: <span id="oppositeNumberDisplay">-</span></div>
-        </div>
-        <div class="progress-container mt-4">
-          <div class="progress-bar h-3 bg-gray-700 rounded-full overflow-hidden">
-            <div id="progressBarFill" class="progress-bar-fill h-full bg-gradient-to-r from-purple-500 to-blue-500 rounded-full animate-[shimmer_2s_linear_infinite]"></div>
-          </div>
-          <p class="text-center text-gray-400 mt-2">Win rate: <span id="confidenceDisplay">CHECK</span></p>
-        </div>
-        <p class="text-center text-gray-400 mt-2">Active Logic: <span id="activeLogic">-</span></p>
-      </div>
-
-      <div id="analysisCard" class="card bg-gray-900 rounded-xl p-5 mb-5 shadow-lg border border-gray-700 animate-[float_6s_infinite_ease-in-out]">
-        <div class="section-title text-lg font-semibold text-blue-400 mb-4 animate-[pulse_3s_infinite_ease-in-out]">
-          <i class="fas fa-tachometer-alt mr-2"></i> Analysis Dashboard
-        </div>
-        <div class="grid grid-cols-2 gap-4">
-          <div class="box bg-gray-800 rounded-lg p-4 text-center text-gray-300 shadow-md">
-            Wins<span id="wins" class="block mt-2 text-xl font-bold text-green-500">0</span>
-          </div>
-          <div class="box bg-gray-800 rounded-lg p-4 text-center text-gray-300 shadow-md">
-            Losses<span id="losses" class="block mt-2 text-xl font-bold text-red-500">0</span>
-          </div>
-          <div class="box bg-gray-800 rounded-lg p-4 text-center text-gray-300 shadow-md">
-            Win Rate<span id="accuracy" class="block mt-2 text-xl font-bold text-blue-400">0%</span>
-          </div>
-          <div class="box bg-gray-800 rounded-lg p-4 text-center text-gray-300 shadow-md">
-            Server Status<span id="serverStatus" class="block mt-2 text-xl font-bold text-green-500">Connected</span>
-          </div>
-        </div>
-      </div>
-
-      <div id="patternCard" class="card bg-gray-900 rounded-xl p-5 mb-5 shadow-lg border border-gray-700 animate-[float_6s_infinite_ease-in-out]" style="display: none;">
-        <div class="section-title text-lg font-semibold text-blue-400 mb-4 animate-[pulse_3s_infinite_ease-in-out]">
-          <i class="fas fa-chart-bar mr-2"></i> Pattern Analysis
-        </div>
-        <div class="pattern-box">
-          <div class="pattern-item">
-            <span class="pattern-label">Recent Pattern</span>
-            <span id="recentPattern" class="pattern-value">-</span>
-          </div>
-          <div class="pattern-item">
-            <span class="pattern-label">Big/Small Ratio</span>
-            <span id="bigSmallRatio" class="pattern-value">-</span>
-          </div>
-          <div class="pattern-item">
-            <span class="pattern-label">Pattern Confidence</span>
-            <span id="patternConfidence" class="pattern-value">-</span>
-          </div>
-          <div class="pattern-item">
-            <span class="pattern-label">Win Level</span>
-            <span id="winLevelDisplay" class="pattern-value">0</span>
-          </div>
-        </div>
-      </div>
-
-      <div id="historyCard" class="card bg-gray-900 rounded-xl p-5 mb-5 shadow-lg border border-gray-700 animate-[float_6s_infinite_ease-in-out]">
-        <div class="section-title text-lg font-semibold text-blue-400 mb-4 animate-[pulse_3s_infinite_ease-in-out]">
-          <i class="fas fa-history mr-2"></i> History
-        </div>
-        <div id="historyContainer" class="space-y-3">
-          </div>
-        <button class="delete-btn mt-4 w-full py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all animate-[pulse_3s_infinite] button-glow" onclick="showClearHistoryModal()">
-          <i class="fas fa-trash-alt mr-2"></i> Clear All History
-        </button>
-      </div>
-
-      <div id="wingoResultsCard" class="card bg-gray-900 rounded-xl p-5 mb-5 shadow-lg border border-gray-700 animate-[float_6s_infinite_ease-in-out]" style="display: none;">
-        <div class="section-title text-lg font-semibold text-blue-400 mb-4 animate-[pulse_3s_infinite_ease-in-out]">
-          <i class="fas fa-history mr-2"></i> Wingo 1 Min - Last 10 Results
-        </div>
-        <div id="wingoResultsContainer" class="space-y-3">
-            </div>
-      </div>
-
-
-      <div class="footer text-center text-gray-400 font-bold text-sm mt-6">
-        ©2025 CREATED BY DORAEMON API SERVER | version 3.2.1
-      </div>
-    </div>
-  </div>
-
-  <div id="clearHistoryModal" class="modal-overlay hidden"> <div class="modal-content modal-fade-in"> <div class="modal-title">Confirm Clear History</div>
-      <div class="modal-message">Are you sure you want to clear all prediction history?</div>
-      <div class="modal-buttons">
-        <button class="modal-button yes" onclick="confirmClearHistory()">Yes</button>
-        <button class="modal-button no" onclick="hideClearHistoryModal()">No</button>
-      </div>
-    </div>
-  </div>
-
-
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
-
-  <script>
-    // --- Dynamic Color Scheme Logic ---
-    const colorSchemes = [
-      { primary: '#162C6E', accent: '#F97316', accentHover: '#FDBA74', accentRgb: '249, 115, 22' },
-      { primary: '#1E3A8A', accent: '#EF4444', accentHover: '#FCA5A5', accentRgb: '239, 68, 68' }, // Example: Dark Blue with Red accent
-      { primary: '#2A8CC2', accent: '#FFFFFF', accentHover: '#E5E7EB', accentRgb: '255, 255, 255' } // Example: Lighter Blue with White accent
-    ];
-
-    function updateColors() {
-      const schemeIndex = Math.floor(Date.now() / 10000) % colorSchemes.length; // Change scheme every 10 seconds
-      const scheme = colorSchemes[schemeIndex];
-
-      document.documentElement.style.setProperty('--primary-color', scheme.primary);
-      document.documentElement.style.setProperty('--accent-color', scheme.accent);
-      document.documentElement.style.setProperty('--accent-hover-color', scheme.accentHover);
-      document.documentElement.style.setProperty('--accent-color-rgb', scheme.accentRgb);
-    }
-
-    updateColors();
-    setInterval(updateColors, 10000); // Update colors every 10 seconds
-
-    // --- Floating Particles ---
-    function createFloatingParticles() {
-        const floatingBg = document.getElementById('floatingBg');
-        if (!floatingBg) return;
-        for (let i = 0; i < 30; i++) { // Number of particles
-            const particle = document.createElement('div');
-            particle.className = 'floating-particle';
-            particle.style.width = `${Math.random() * 20 + 10}px`;
-            particle.style.height = particle.style.width;
-            particle.style.left = `${Math.random() * 100}%`;
-            particle.style.animationDelay = `${Math.random() * 15}s`; // Randomize start time
-            floatingBg.appendChild(particle);
-        }
-    }
-    createFloatingParticles();
-
-
-    // --- Rupee Effect on Click ---
-    function createRupeeEffect(x, y) {
-      const rupee = document.createElement('div');
-      rupee.className = 'rupee-effect';
-      rupee.textContent = '₹'; // Rupee symbol
-      rupee.style.left = `${x}px`;
-      rupee.style.top = `${y}px`;
-      document.body.appendChild(rupee);
-      setTimeout(() => rupee.remove(), 1000); // Remove after 1 second
-    }
-
-    document.addEventListener('click', (e) => {
-      createRupeeEffect(e.clientX, e.clientY);
-    });
-    document.addEventListener('touchstart', (e) => {
-      if (e.touches.length > 0) {
-        const touch = e.touches[0];
-        createRupeeEffect(touch.clientX, touch.clientY);
-      }
-    });
-
-    // --- Sparkle Effect (Placeholder) ---
-    function startSparkleEffect() {
-      // This can be expanded with actual sparkle logic if needed
-      // console.log("Sparkle effect started (placeholder)");
-    }
-
-
-    // --- Device ID Management ---
-    function generateDeviceId() {
-      // Generates a simple pseudo-random device ID
-      const numbers = Math.floor(Math.random() * 100).toString().padStart(2, '0'); // 00-99
-      const letters = Array.from({length: 2}, () => String.fromCharCode(97 + Math.floor(Math.random() * 26))).join(''); // a-z
-      return `DORA-${numbers}${letters}`; // e.g., DORA-12ab
-    }
-
-    function getDeviceId() {
-      let deviceId = localStorage.getItem("deviceId");
-      if (!deviceId) {
-        deviceId = generateDeviceId();
-        localStorage.setItem("deviceId", deviceId);
-      }
-      return deviceId;
-    }
-
-    function copyDeviceId() {
-        const deviceIdText = document.getElementById('deviceId').textContent;
-        const copyFeedback = document.getElementById('copyFeedback');
-        if (!deviceIdText) {
-            showInvalidKeyPopup("Device ID not available to copy.");
-            return;
-        }
-
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(deviceIdText)
-            .then(() => {
-                copyFeedback.classList.add('show');
-                setTimeout(() => copyFeedback.classList.remove('show'), 2000);
-                console.log('Device ID copied:', deviceIdText);
-            })
-            .catch(err => {
-                console.error('Failed to copy Device ID using Clipboard API:', err);
-                fallbackCopyDeviceId(deviceIdText); // Fallback for browsers that might restrict clipboard API in iframes
-            });
-        } else {
-            console.log('Clipboard API not available, using fallback');
-            fallbackCopyDeviceId(deviceIdText);
-        }
-    }
-
-    function fallbackCopyDeviceId(text) {
-        const textarea = document.createElement('textarea');
-        textarea.value = text;
-        textarea.style.position = 'fixed'; // Prevent scrolling to bottom of page in MS Edge.
-        textarea.style.opacity = '0'; // Make it invisible
-        document.body.appendChild(textarea);
-        textarea.focus();
-        textarea.select();
-
-        try {
-            const successful = document.execCommand('copy');
-            const copyFeedback = document.getElementById('copyFeedback');
-            if (successful) {
-                copyFeedback.classList.add('show');
-                setTimeout(() => copyFeedback.classList.remove('show'), 2000);
-                console.log('Device ID copied using fallback:', text);
-            } else {
-                console.error('Fallback copy failed');
-                showInvalidKeyPopup('Failed to copy Device ID. Please copy manually.');
-            }
-        } catch (err) {
-            console.error('Fallback copy error:', err);
-            showInvalidKeyPopup('Failed to copy Device ID. Please copy manually.');
-        } finally {
-            document.body.removeChild(textarea);
-        }
-    }
-
-
-    // --- Popup Management ---
-    function showInvalidKeyPopup(message) {
-      const errorMessage = document.getElementById('errorMessage');
-      if (errorMessage) {
-        errorMessage.textContent = message;
-        document.getElementById('invalidKeyPopup').classList.add('show');
-      } else {
-        console.error('Error message element not found for invalidKeyPopup.');
-      }
-    }
-
-    function hideInvalidKeyPopup() {
-      document.getElementById('invalidKeyPopup').classList.remove('show');
-    }
-
-    function showAdminMessagePopup(message) {
-        const adminPopupMessage = document.getElementById('adminPopupMessage');
-        if (adminPopupMessage) {
-            adminPopupMessage.textContent = message;
-            document.getElementById('adminMessagePopup').classList.add('show');
-        } else {
-            console.error('Admin popup message element not found.');
-        }
-    }
-
-    function hideAdminMessagePopup() {
-        document.getElementById('adminMessagePopup').classList.remove('show');
-    }
-
-    // --- Server and Message Handling ---
-    let isServerOn = true; // Assume server is on by default, will be updated by Firebase
-    let messageQueue = [];
-    let isShowingMessage = false;
-
-
-    // --- Firebase Configuration (Updated to match Admin Panel) ---
-    const firebaseConfig = {
-      apiKey: "AIzaSyDCGgg1TgPjkTNkx5NUSFdDCduRf1uSba4",
-      authDomain: "newrox-ai.firebaseapp.com",
-      databaseURL: "https://newrox-ai-default-rtdb.firebaseio.com", // From Admin Panel
-      projectId: "newrox-ai",
-      storageBucket: "newrox-ai.firebasestorage.app", // From Admin Panel
-      messagingSenderId: "521506398161",
-      appId: "1:521506398161:web:ca6a684b6616bbb3000af0",
-      measurementId: "G-LH2B2C3HLL" // Optional
-    };
-
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
-
-    // --- Game State Management ---
-    let historyData = [];
-    let lastFetchedPeriod = null;
-    let lastResult = null;
-    let lastPrediction = null;
-    let lastStatus = null;
-    let lastOppositeNumber = null;
-    let globalPrediction = null;
-    let winLevel = 0;
-    const MAX_WIN_LEVEL = 2;
-
-    function saveGameState() {
-        const gameState = {
-            historyData,
-            lastFetchedPeriod,
-            lastResult,
-            lastPrediction,
-            lastStatus,
-            lastOppositeNumber,
-            globalPrediction,
-            winLevel
+    <script>
+        // --- Firebase Configuration ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyDCGgg1TgPjkTNkx5NUSFdDCduRf1uSba4", // Replace with your actual API key
+            authDomain: "newrox-ai.firebaseapp.com",
+            databaseURL: "https://newrox-ai-default-rtdb.firebaseio.com",
+            projectId: "newrox-ai",
+            storageBucket: "newrox-ai.appspot.com",
+            messagingSenderId: "521506398161",
+            appId: "1:521506398161:web:ca6a684b6616bbb3000af0",
+            measurementId: "G-LH2B2C3HLL"
         };
-        try {
-            localStorage.setItem('gameState_wingo', JSON.stringify(gameState)); // Use a unique key
-            // console.log('Game state saved to localStorage');
-        } catch (e) {
-            console.error("Error saving game state to localStorage:", e);
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // --- DOM Elements ---
+        const loginScreen = document.getElementById('loginScreen');
+        const predictorAppContainer = document.getElementById('predictorAppContainer');
+        const loginStatusMessageEl = document.getElementById('loginStatusMessage'); 
+        const predictorLogoutBtn = document.getElementById('predictorLogoutBtn');
+        const globalMessageBar = document.getElementById('globalMessageBar');
+        const globalMessageText = document.getElementById('globalMessageText');
+        const generatedDeviceIdElement = document.getElementById('generatedDeviceIdElement');
+        const copyGeneratedIdBtn = document.getElementById('copyGeneratedIdBtn');
+        const copyGeneratedIdFeedback = document.getElementById('copyGeneratedIdFeedback');
+
+        // --- Predictor Auth State ---
+        const USER_DEVICE_ID_STORAGE_KEY = 'userGeneratedDeviceId_NewRoxAI'; 
+        const PREDICTOR_LOGGED_IN_DEVICE_ID_KEY = 'predictorLoggedInDeviceId_NewRoxAI'; 
+        let isPredictorServerOn = true; 
+        let currentGlobalMessageId = null;
+        let autoLoginInterval = null; 
+        const AUTO_LOGIN_CHECK_INTERVAL = 7000; // Check every 7 seconds
+
+
+        // --- START Global Variables & Configuration (from original main.html) ---
+        const APP_STORAGE_PREFIX = 'newrox_ai_predictor_';
+        let allHistory = JSON.parse(localStorage.getItem(APP_STORAGE_PREFIX + 'allHistory')) || [];
+        let currentAIPrediction = JSON.parse(localStorage.getItem(APP_STORAGE_PREFIX + 'currentAIPrediction')) || null;
+        let localWinLevel = parseInt(localStorage.getItem(APP_STORAGE_PREFIX + 'localWinLevel')) || 0;
+        let lastAPIFetchedPeriodFull = localStorage.getItem(APP_STORAGE_PREFIX + 'lastAPIFetchedPeriodFull') || null;
+        
+        let moduleEffectiveness = JSON.parse(localStorage.getItem(APP_STORAGE_PREFIX + 'moduleEffectiveness')) || {
+            Trend: { wins: 0, losses: 0, weightMultiplier: 1.0 },
+            Dominance: { wins: 0, losses: 0, weightMultiplier: 1.0 },
+            Recency: { wins: 0, losses: 0, weightMultiplier: 1.0 },
+            CP: { wins: 0, losses: 0, weightMultiplier: 1.0 }, 
+            Rhythm: { wins: 0, losses: 0, weightMultiplier: 1.0 }
+        };
+        const EFFECTIVENESS_MEMORY = 15; 
+        const MAX_HISTORY_ITEMS_DISPLAY = 50; 
+        const MAX_HISTORY_ITEMS_STORAGE = 100; 
+        const API_FETCH_INTERVAL = 7000; 
+        const MAX_WIN_LEVEL_STREAK = 2; 
+        let isUpdatingData = false; 
+        let apiStatusTimeoutId = null;
+        // --- END Global Variables & Configuration ---
+
+        // --- START DOM Element References (from original main.html) ---
+        const pageButtons = document.querySelectorAll('.nav-button');
+        const pages = document.querySelectorAll('.page');
+        const currentPeriodEl = document.getElementById('currentPeriod');
+        const currentResultEl = document.getElementById('currentResult');
+        const currentPredictionEl = document.getElementById('currentPrediction');
+        const resultIconEl = document.getElementById('resultIcon');
+        const activeLogicDisplayEl = document.getElementById('activeLogicDisplay');
+        const mostFrequentEl = document.getElementById('mostFrequent');
+        const leastFrequentEl = document.getElementById('leastFrequent');
+        const winRateEl = document.getElementById('winRate');
+        const totalWinBetsEl = document.getElementById('totalWinBets');
+        const totalLossBetsEl = document.getElementById('totalLossBets');
+        const localWinLevelDisplayEl = document.getElementById('localWinLevelDisplay');
+        const historyContainerEl = document.getElementById('historyContainer');
+        const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+        const winRatePopup = document.getElementById('winRatePopup');
+        const closeWinPopupBtn = document.getElementById('closeWinPopupBtn');
+        const clearHistoryModal = document.getElementById('clearHistoryModal');
+        const confirmClearBtn = document.getElementById('confirmClear');
+        const cancelClearBtn = document.getElementById('cancelClear');
+        const apiStatusEl = document.getElementById('apiStatus');
+        // --- END DOM Element References ---
+
+        const DEFAULT_PREDICTION_ITEM_STRUCTURE = {
+            id: null, period: null, fullPeriod: null, predictionTime: null, 
+            prediction: null, predictionType: "BIG/SMALL", oppositeNumber: null, 
+            confidence: 0, logic: "N/A", result: null, resultType: null, 
+            resultColor: null, status: "Pending", 
+        };
+
+        // --- Device ID Generation and Management ---
+        function generateUniqueId() {
+            return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+                (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+            );
         }
-    }
 
-    function restoreGameState() {
-        try {
-            const savedState = localStorage.getItem('gameState_wingo'); // Use the unique key
-            if (savedState) {
-                const state = JSON.parse(savedState);
-                historyData = state.historyData || [];
-                lastFetchedPeriod = state.lastFetchedPeriod || null;
-                lastResult = state.lastResult || null;
-                lastPrediction = state.lastPrediction || null;
-                lastStatus = state.lastStatus || null;
-                lastOppositeNumber = state.lastOppositeNumber || null;
-                globalPrediction = state.globalPrediction || null;
-                winLevel = state.winLevel || 0;
-
-                if (historyData.length > 0) {
-                    const latestEntry = historyData[0];
-                    document.getElementById("periodDisplay").value = latestEntry.period || "-";
-                    document.getElementById("predictionDisplay").innerText = latestEntry.prediction || "-";
-                    document.getElementById("oppositeNumberDisplay").innerText = latestEntry.oppositeNumber || "-";
-                    if (latestEntry.resultStatus === "Pending") {
-                        document.getElementById("resultStatus").innerText = "-";
-                        document.getElementById("resultStatus").style.color = "var(--light-gray)";
-                    } else {
-                        document.getElementById("resultStatus").innerText = `${latestEntry.resultStatus} (${latestEntry.result})`;
-                        document.getElementById("resultStatus").style.color = latestEntry.resultStatus === "WIN" ? "var(--win-green)" : "var(--loss-red)";
-                    }
-                    const confidencePercent = latestEntry.prediction ? Math.round(autoPredict().confidence * 100) : 0;
-                    document.getElementById("confidenceDisplay").innerText = `${confidencePercent}%`;
-                    document.getElementById("progressBarFill").style.width = `${confidencePercent}%`;
-                }
-                updateHistory();
-                updateStats();
-                // console.log('Game state restored from localStorage');
+        function getOrGenerateUserDeviceId() {
+            let userDeviceId = localStorage.getItem(USER_DEVICE_ID_STORAGE_KEY);
+            if (!userDeviceId) {
+                userDeviceId = "NEWROX-USER-" + generateUniqueId().substring(0,12).toUpperCase();
+                localStorage.setItem(USER_DEVICE_ID_STORAGE_KEY, userDeviceId);
             }
-        } catch (e) {
-            console.error("Error restoring game state from localStorage:", e);
-            // Optionally clear localStorage if parsing fails to prevent future errors
-            // localStorage.removeItem('gameState_wingo');
+            if (generatedDeviceIdElement) {
+                 generatedDeviceIdElement.textContent = userDeviceId;
+            }
+            return userDeviceId;
         }
-    }
-
-    function clearPredictionDisplay() {
-        document.getElementById("periodDisplay").value = "-";
-        document.getElementById("resultStatus").innerText = "Server Offline";
-        document.getElementById("resultStatus").style.color = "var(--loss-red)";
-        document.getElementById("predictionDisplay").innerText = "-";
-        document.getElementById("oppositeNumberDisplay").innerText = "-";
-        document.getElementById("confidenceDisplay").innerText = "CHECK";
-        document.getElementById("progressBarFill").style.width = "0%";
-        document.getElementById('activeLogic').textContent = '-';
-    }
-
-
-    function checkServerStatus() {
-      const maintenancePopup = document.getElementById('maintenancePopup');
-      const serverStatusElement = document.getElementById('serverStatus'); // In game section
-
-      database.ref("serverStatus").on("value", snapshot => {
-        const serverData = snapshot.val() || { status: "on" }; // Default to 'on' if not set
-        const wasServerOn = isServerOn;
-        isServerOn = serverData.status === "on";
-
-        if (!isServerOn) {
-          maintenancePopup.classList.add('show');
-          if(serverStatusElement) {
-            serverStatusElement.textContent = "Offline";
-            serverStatusElement.className = "block mt-2 text-xl font-bold text-red-500";
-          }
-          saveGameState(); // Save state before clearing display
-          clearPredictionDisplay();
-        } else {
-          maintenancePopup.classList.remove('show');
-           if(serverStatusElement) {
-            serverStatusElement.textContent = "Connected";
-            serverStatusElement.className = "block mt-2 text-xl font-bold text-green-500";
-          }
-          if (!wasServerOn && document.getElementById('gameSection').style.display === 'block') { // If server was off and now on, and we are in game section
-            restoreGameState();
-            updatePrediction(); // Fetch new prediction
-          }
+        
+        function copyGeneratedDeviceId() {
+            const deviceIdToCopy = generatedDeviceIdElement.textContent;
+            // Use document.execCommand as primary due to iFrame restrictions
+            const textArea = document.createElement("textarea");
+            textArea.value = deviceIdToCopy;
+            textArea.style.position = "fixed"; // Prevent scrolling to bottom
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    copyGeneratedIdFeedback.style.display = 'inline';
+                    setTimeout(() => { copyGeneratedIdFeedback.style.display = 'none'; }, 2000);
+                } else {
+                    console.error('Fallback copy was unsuccessful.');
+                    alert('Failed to copy Device ID. Please copy it manually.');
+                }
+            } catch (err) {
+                console.error('Fallback copy failed:', err);
+                alert('Failed to copy Device ID. Please copy it manually.');
+            }
+            document.body.removeChild(textArea);
         }
-      }, err => {
-        console.error('Error checking server status:', err);
-        showInvalidKeyPopup('Error checking server status. Please try again later.');
-        isServerOn = false; // Assume server is off on error
-        if(serverStatusElement) {
-            serverStatusElement.textContent = "Error";
-            serverStatusElement.className = "block mt-2 text-xl font-bold text-red-500";
+
+
+        function updateLoginStatusMessage(message, type = 'info') {
+            if (loginStatusMessageEl) {
+                loginStatusMessageEl.innerHTML = message; 
+                loginStatusMessageEl.className = 'login-status-message'; 
+                if (type === 'error') {
+                    loginStatusMessageEl.classList.add('error');
+                } else if (type === 'success') {
+                    loginStatusMessageEl.classList.add('success');
+                } else { 
+                    loginStatusMessageEl.classList.add('info');
+                }
+            }
         }
-        saveGameState();
-        clearPredictionDisplay();
-      });
-    }
 
+        // --- Predictor Login/Logout and State Management ---
+        function checkPredictorLoginStatus() {
+            getOrGenerateUserDeviceId(); 
+            
+            fetchPredictorServerStatus().then(() => { 
+                const loggedInDeviceId = localStorage.getItem(PREDICTOR_LOGGED_IN_DEVICE_ID_KEY);
+                if (loggedInDeviceId && isPredictorServerOn) { 
+                    console.log("Previously logged-in Device ID found, attempting validation...");
+                    attemptAutoLogin(loggedInDeviceId); 
+                } else if (isPredictorServerOn) { 
+                    updateLoginStatusMessage('<i class="fas fa-spinner fa-spin mr-2"></i>Checking access status...', 'info');
+                    attemptAutoLogin(); 
+                } else if (!isPredictorServerOn) {
+                     updateLoginStatusMessage('Predictor is currently offline. Please try again later.', 'error');
+                }
+            });
+            fetchGlobalMessage(); 
 
-    function listenForCustomMessages() {
-        let isFirstLoad = true; // To prevent showing message on initial load
+            if (autoLoginInterval) clearInterval(autoLoginInterval); 
+            autoLoginInterval = setInterval(() => {
+                // Only attempt auto-login if the login screen is visible and no successful login yet
+                if (loginScreen.style.display === 'flex' && !localStorage.getItem(PREDICTOR_LOGGED_IN_DEVICE_ID_KEY)) { 
+                    console.log("Periodic auto-login check...");
+                    attemptAutoLogin();
+                } else if (localStorage.getItem(PREDICTOR_LOGGED_IN_DEVICE_ID_KEY) && autoLoginInterval) {
+                    // If logged in, clear the interval
+                    clearInterval(autoLoginInterval);
+                    autoLoginInterval = null;
+                    console.log("User logged in, auto-check interval cleared.");
+                }
+            }, AUTO_LOGIN_CHECK_INTERVAL);
+        }
 
-        database.ref("customMessage").on("value", snapshot => {
-            if (isFirstLoad) {
-                isFirstLoad = false;
+        async function attemptAutoLogin(deviceIdToLogin = null) {
+            const currentDeviceId = deviceIdToLogin || getOrGenerateUserDeviceId(); 
+
+            if (!isPredictorServerOn) {
+                if (loginScreen.style.display === 'flex'){
+                    updateLoginStatusMessage('Predictor is currently offline. Please try again later.', 'error');
+                }
                 return;
             }
-
-            const data = snapshot.val();
-            if (data && data.message && data.timestamp) {
-                // Check if this message was already shown (e.g. by storing last timestamp)
-                // For simplicity, just queue it. More robust would be to check timestamp against a stored one.
-                messageQueue.push(data.message);
-                processMessageQueue();
+            
+            // Only show spinner if login screen is visible and we are not already showing success
+            if (loginScreen.style.display === 'flex' && 
+                (!loginStatusMessageEl.innerHTML.includes('fa-spinner') && 
+                 !loginStatusMessageEl.innerHTML.includes('Access granted'))) {
+                 updateLoginStatusMessage('<i class="fas fa-sync-alt fa-spin mr-2"></i>Verifying access...', 'info');
             }
-        }, err => {
-            console.error('Error listening for custom messages:', err);
-        });
 
-        // Example initial message if needed, or remove if only Firebase messages are desired
-        // messageQueue.push("Welcome! Keys are available from @YOUKNOWDORAEMON.");
-        // processMessageQueue();
-    }
-
-    function processMessageQueue() {
-        if (isShowingMessage || messageQueue.length === 0) return;
-
-        isShowingMessage = true;
-        const message = messageQueue.shift();
-        
-        showAdminMessagePopup(message);
-        // console.log('Admin message displayed in popup:', message);
-    }
-
-
-    // --- Login and Dashboard Logic ---
-    async function login() {
-      try {
-        // First, check server status from Firebase
-        const serverStatusSnapshot = await database.ref("serverStatus").get();
-        const serverData = serverStatusSnapshot.val() || { status: "on" };
-
-        if (serverData.status === "off") {
-          // Show maintenance popup directly without key check
-          document.getElementById('maintenancePopup').classList.add('show');
-          return;
-        }
-        // Hide maintenance popup if it was shown and server is now on
-        document.getElementById('maintenancePopup').classList.remove('show');
-
-
-        const key = document.getElementById("accessKey").value.trim();
-        const currentDeviceId = getDeviceId(); // Use the device ID generated and stored by this client
-
-        if (!key || key.length === 0 || !/^[A-Za-z0-9\-]+$/.test(key)) {
-          showInvalidKeyPopup("Please enter a valid access key (alphanumeric and hyphens only).");
-          return;
-        }
-
-        const ref = database.ref("accessKeys/" + key);
-        const snapshot = await ref.get();
-
-        if (!snapshot.exists()) {
-          showInvalidKeyPopup("Invalid access key. Please check your key.");
-          return;
-        }
-
-        const keyData = snapshot.val();
-
-        // Check expiry
-        const now = Date.now(); // Use current client time for expiry check
-        if (keyData.expiry && now > keyData.expiry) {
-          showInvalidKeyPopup("This access key has expired.");
-          return;
-        }
-
-        // Check device ID
-        // If the key in Firebase has a deviceId, it must match the current device's ID
-        if (keyData.deviceId && keyData.deviceId !== currentDeviceId) {
-          showInvalidKeyPopup("This key is registered to a different device.");
-          return;
-        }
-        // If the key in Firebase *doesn't* have a deviceId, it implies it might be an older key
-        // or a key type that doesn't enforce device binding from the admin panel's perspective.
-        // For this client, we always expect a deviceId to be associated with the key from admin.
-        // If the admin panel *always* creates keys with deviceIds, this check is fine.
-        // If admin can create keys *without* deviceIds, and those should be usable, this logic needs adjustment.
-        // Assuming admin panel *always* sets a deviceId for keys intended for this client type:
-        if (!keyData.deviceId) {
-            showInvalidKeyPopup("Access key is not properly configured for this device. (No Device ID found on key)");
-            return;
-        }
-
-
-        localStorage.setItem("accessKey_wingo", key); // Use a unique key for localStorage
-
-        document.getElementById('loginSection').style.display = 'none';
-        document.getElementById('loginHeader').style.display = 'none';
-        document.getElementById('dashboardSection').style.display = 'block';
-        document.getElementById('dashboardHeader').style.display = 'block';
-        populateDashboard();
-
-      } catch (err) {
-        console.error('Login error:', err);
-        showInvalidKeyPopup("Error during login: " + (err.message || "Please try again."));
-      }
-    }
-
-    async function fetchKeyValidity(key) {
-        try {
-            const ref = database.ref("accessKeys/" + key);
-            const snapshot = await ref.get();
-            if (snapshot.exists()) {
-                const data = snapshot.val();
-                const expiry = data.expiry;
-                if (expiry) {
-                    const expiryDate = new Date(expiry);
-                    return expiryDate.toLocaleString('en-GB', { // Using a common locale for consistent display
-                        day: '2-digit', month: '2-digit', year: 'numeric',
-                        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+            try {
+                const accessKeysSnapshot = await db.ref("accessKeys").orderByChild("deviceId").equalTo(currentDeviceId).once("value");
+                
+                if (accessKeysSnapshot.exists()) {
+                    let isValidDevice = false;
+                    let isExpired = false;
+                    accessKeysSnapshot.forEach(childSnapshot => {
+                        const keyData = childSnapshot.val();
+                        if (keyData.deviceId === currentDeviceId) {
+                            if (!keyData.expiry || Date.now() < keyData.expiry) {
+                                isValidDevice = true;
+                            } else {
+                                isExpired = true;
+                            }
+                        }
                     });
+
+                    if (isValidDevice) {
+                        localStorage.setItem(PREDICTOR_LOGGED_IN_DEVICE_ID_KEY, currentDeviceId);
+                        showPredictorApp();
+                        if (autoLoginInterval) {
+                            clearInterval(autoLoginInterval);
+                            autoLoginInterval = null;
+                        }
+                        console.log(`Auto-login successful for Device ID: ${currentDeviceId}.`);
+                    } else if (isExpired) {
+                        if (loginScreen.style.display === 'flex') {
+                            updateLoginStatusMessage('Your access for this Device ID has expired. Contact admin.', 'error');
+                        }
+                        // Do not call handlePredictorLogout here if it's just an expired check during periodic scan,
+                        // unless they were previously logged in with this ID.
+                        if (localStorage.getItem(PREDICTOR_LOGGED_IN_DEVICE_ID_KEY) === currentDeviceId) {
+                           handlePredictorLogout('Your access has expired.'); 
+                        }
+                    } else {
+                        if (loginScreen.style.display === 'flex') {
+                            updateLoginStatusMessage('Waiting for admin approval for this Device ID.', 'info');
+                        }
+                    }
                 } else {
-                    return "No expiration set";
+                     if (loginScreen.style.display === 'flex') {
+                        updateLoginStatusMessage('Device ID not registered. Please provide it to the admin.', 'info');
+                     }
                 }
-            } else {
-                // This case should ideally be caught by the login function
-                // but good to have a fallback message.
-                return "Key not found.";
-            }
-        } catch (err) {
-            console.error('Error fetching key validity:', err);
-            return "Error fetching validity.";
-        }
-    }
-
-
-    async function populateDashboard() {
-      const accessKey = localStorage.getItem("accessKey_wingo");
-      const deviceId = getDeviceId(); // This client's device ID
-
-      const accessKeyElement = document.getElementById('dashboardAccessKey');
-      if (accessKey && accessKeyElement) {
-        accessKeyElement.textContent = accessKey;
-      } else {
-        // If no access key, perhaps redirect to login or show error
-        console.error("Access key not found in localStorage for dashboard.");
-        // showLoginSection(); // Example function to go back to login
-        return;
-      }
-
-      const deviceIdElement = document.getElementById('dashboardDeviceId');
-      if (deviceId && deviceIdElement) {
-        deviceIdElement.textContent = deviceId;
-      }
-
-      const validity = await fetchKeyValidity(accessKey); // Fetch validity for the stored key
-      const keyValidityElement = document.getElementById('keyValidity');
-      if (keyValidityElement) { // Check if element exists
-          keyValidityElement.textContent = validity;
-      }
-    }
-
-
-    function showGameSection() {
-      document.getElementById('dashboardSection').style.display = 'none';
-      document.getElementById('dashboardHeader').style.display = 'none';
-      document.getElementById('gameSection').style.display = 'block';
-      document.getElementById('gameHeader').style.display = 'block';
-
-      if (isServerOn) {
-        restoreGameState(); // Restore state when entering game
-        updatePrediction(); // Initial prediction
-      } else {
-        clearPredictionDisplay(); // If server is off, show offline state
-      }
-    }
-
-    // --- Game Mode Switching ---
-    function switchToBasicMode() {
-        document.getElementById('basicModeBtn').classList.remove('inactive');
-        document.getElementById('basicModeBtn').classList.add('active');
-        document.getElementById('proModeBtn').classList.remove('active');
-        document.getElementById('proModeBtn').classList.add('inactive');
-
-        document.getElementById('predictionCard').style.display = 'block';
-        document.getElementById('analysisCard').style.display = 'block';
-        document.getElementById('historyCard').style.display = 'block';
-        document.getElementById('patternCard').style.display = 'none';
-        document.getElementById('wingoResultsCard').style.display = 'none';
-    }
-
-    function switchToProMode() {
-        document.getElementById('proModeBtn').classList.remove('inactive');
-        document.getElementById('proModeBtn').classList.add('active');
-        document.getElementById('basicModeBtn').classList.remove('active');
-        document.getElementById('basicModeBtn').classList.add('inactive');
-
-        document.getElementById('predictionCard').style.display = 'block'; // Still show main prediction
-        document.getElementById('analysisCard').style.display = 'none'; // Hide basic analysis
-        document.getElementById('historyCard').style.display = 'none'; // Hide basic history
-        document.getElementById('patternCard').style.display = 'block'; // Show pro pattern analysis
-        document.getElementById('wingoResultsCard').style.display = 'block'; // Show Wingo results
-
-        fetchWingoResults(); // Fetch results for pro mode
-        // Potentially update other pro-mode specific displays here
-        // For example, populate patternCard if it has dynamic data
-    }
-
-
-    // --- Prediction Logic ---
-    function getOppositeNumber(prediction) {
-        const small = [0, 1, 2, 3, 4];
-        const big = [5, 6, 7, 8, 9];
-        let arr = prediction === "BIG" ? small : big;
-        return arr[Math.floor(Math.random() * arr.length)];
-    }
-
-    function neuralNetworkPrediction(recent) {
-        if (recent.length === 0) return { prediction: Math.random() > 0.5 ? "BIG" : "SMALL", confidence: 0.5, logic: 19 };
-        const bigCount = recent.filter(r => r.resultType === "BIG").length;
-        const smallCount = recent.length - bigCount;
-
-        let lastType = recent[0].resultType;
-        let streakLength = 1;
-        for (let i = 1; i < recent.length; i++) {
-            if (recent[i].resultType === lastType) streakLength++;
-            else break;
-        }
-
-        if (streakLength >= 3) return { prediction: lastType === "BIG" ? "SMALL" : "BIG", confidence: 0.80, logic: 19 };
-        if (bigCount / recent.length > 0.6) return { prediction: "SMALL", confidence: 0.75, logic: 19 };
-        if (smallCount / recent.length > 0.6) return { prediction: "BIG", confidence: 0.75, logic: 19 };
-        return { prediction: bigCount > smallCount ? "SMALL" : "BIG", confidence: 0.70, logic: 19 };
-    }
-
-    function fibonacciPrediction(recent) {
-        if (recent.length === 0) return { prediction: Math.random() > 0.5 ? "BIG" : "SMALL", confidence: 0.5, logic: 25 };
-        const levels = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1];
-        const bigCount = recent.filter(r => r.resultType === "BIG").length;
-        const ratio = bigCount / recent.length;
-
-        if (ratio > 0.618) return { prediction: "SMALL", confidence: 0.75, logic: 25 };
-        if (ratio < 0.382) return { prediction: "BIG", confidence: 0.75, logic: 25 };
-        return { prediction: recent[0].resultType === "BIG" ? "SMALL" : "BIG", confidence: 0.70, logic: 25 };
-    }
-
-    function machineLearningPrediction(recent) {
-        if (recent.length === 0) return { prediction: Math.random() > 0.5 ? "BIG" : "SMALL", confidence: 0.5, logic: 28 };
-        const bigCount = recent.filter(r => r.resultType === "BIG").length;
-        const smallCount = recent.length - bigCount;
-
-        let lastType = recent[0].resultType;
-        let streakLength = 1;
-        for (let i = 1; i < recent.length; i++) {
-            if (recent[i].resultType === lastType) streakLength++;
-            else break;
-        }
-
-        let alternating = true;
-        for (let i = 1; i < Math.min(6, recent.length); i++) {
-            if ((recent[i-1].resultType === "BIG" && recent[i].resultType !== "SMALL") ||
-                (recent[i-1].resultType === "SMALL" && recent[i].resultType !== "BIG")) {
-                alternating = false;
-                break;
+            } catch (error) {
+                console.error("Predictor auto-login error:", error);
+                if (loginScreen.style.display === 'flex') {
+                    updateLoginStatusMessage('Error checking access. Please try refreshing.', 'error');
+                }
             }
         }
 
-        if (streakLength >= 3) return { prediction: lastType === "BIG" ? "SMALL" : "BIG", confidence: 0.85, logic: 28 };
-        if (alternating && recent.length >= 2) return { prediction: recent[0].resultType === "BIG" ? "SMALL" : "BIG", confidence: 0.80, logic: 28 }; // Predict opposite of last if alternating
-        if (bigCount / recent.length > 0.6) return { prediction: "SMALL", confidence: 0.78, logic: 28 };
-        if (smallCount / recent.length > 0.6) return { prediction: "BIG", confidence: 0.78, logic: 28 };
-        return { prediction: bigCount > smallCount ? "SMALL" : "BIG", confidence: 0.75, logic: 28 };
-    }
+        function handlePredictorLogout(message = "You have been logged out.") {
+            const wasLoggedIn = !!localStorage.getItem(PREDICTOR_LOGGED_IN_DEVICE_ID_KEY);
+            localStorage.removeItem(PREDICTOR_LOGGED_IN_DEVICE_ID_KEY);
+            
+            showPredictorLoginScreen();
+            getOrGenerateUserDeviceId(); 
+            updateLoginStatusMessage(message, 'info');
+            console.log("Logged out from predictor.");
 
-
-    function enhancedTrendAnalysis(history) {
-        if (history.length < 3) {
-            // Default to random with base confidence if not enough data
-            return { prediction: Math.random() > 0.5 ? "BIG" : "SMALL", confidence: 0.35 + Math.random() * (0.65 - 0.35), logic: 0 };
+            if (wasLoggedIn && !autoLoginInterval) { 
+                 autoLoginInterval = setInterval(() => {
+                    if (loginScreen.style.display === 'flex' && !localStorage.getItem(PREDICTOR_LOGGED_IN_DEVICE_ID_KEY)) {
+                        console.log("Periodic auto-login check after logout...");
+                        attemptAutoLogin();
+                    } else if (localStorage.getItem(PREDICTOR_LOGGED_IN_DEVICE_ID_KEY) && autoLoginInterval) {
+                        clearInterval(autoLoginInterval);
+                        autoLoginInterval = null;
+                    }
+                }, AUTO_LOGIN_CHECK_INTERVAL);
+            }
         }
 
-        let recentResults = history.filter(h => h.result !== "-" && h.resultType).slice(0, 5); // Ensure resultType exists
-        if (recentResults.length < 1) { // Need at least one result for logic
-             return { prediction: Math.random() > 0.5 ? "BIG" : "SMALL", confidence: 0.35 + Math.random() * (0.65 - 0.35), logic: 0 };
+        function showPredictorLoginScreen() {
+            loginScreen.style.display = 'flex';
+            predictorAppContainer.style.display = 'none';
+        }
+
+        function showPredictorApp() {
+            loginScreen.style.display = 'none';
+            predictorAppContainer.style.display = 'block';
+            updateUI(); 
+            updateGameData(); 
+            fetchGlobalMessage(); 
+        }
+
+        async function fetchPredictorServerStatus() {
+            try {
+                const serverStatusRef = db.ref("predictorServerStatus");
+                const snapshot = await serverStatusRef.get(); 
+                const serverData = snapshot.val() || { status: "on" };
+                isPredictorServerOn = serverData.status === "on";
+                console.log("Initial Predictor Server Status:", isPredictorServerOn ? "ON" : "OFF");
+
+                serverStatusRef.on("value", snapshot => {
+                    const updatedServerData = snapshot.val() || { status: "on" };
+                    const serverBecameOffline = isPredictorServerOn && updatedServerData.status === "off";
+                    const serverBecameOnline = !isPredictorServerOn && updatedServerData.status === "on";
+
+                    isPredictorServerOn = updatedServerData.status === "on";
+                    console.log("Predictor Server Status Changed To:", isPredictorServerOn ? "ON" : "OFF");
+
+                    const isLoggedIn = !!localStorage.getItem(PREDICTOR_LOGGED_IN_DEVICE_ID_KEY);
+
+                    if (serverBecameOffline && isLoggedIn) {
+                        console.log("Server went offline while user was logged in. Logging out.");
+                        alert("The predictor has been turned off by the administrator. You have been logged out.");
+                        handlePredictorLogout("Predictor is now offline. You've been logged out.");
+                    } else if (serverBecameOnline && !isLoggedIn) {
+                        console.log("Server came online. Attempting auto-login.");
+                        updateLoginStatusMessage('<i class="fas fa-spinner fa-spin mr-2"></i>Server is online. Checking access...', 'info');
+                        attemptAutoLogin();
+                    } else if (!isPredictorServerOn && !isLoggedIn) {
+                         if (loginScreen.style.display === 'flex') { // Only update if login screen is visible
+                            updateLoginStatusMessage('Predictor is currently offline by admin.', 'error');
+                         }
+                    }
+                });
+            } catch (error) {
+                 console.error("Error fetching initial predictor server status:", error);
+                 updateLoginStatusMessage('Could not verify predictor status. Please refresh.', 'error');
+                 isPredictorServerOn = false; 
+                 showPredictorLoginScreen();
+            }
         }
 
 
-        let predictions = [
-            neuralNetworkPrediction(recentResults),
-            fibonacciPrediction(recentResults),
-            machineLearningPrediction(recentResults)
-        ];
-
-        // Simple averaging or weighted averaging can be used. For now, pick best confidence.
-        let bestPrediction = predictions.reduce((best, current) => current.confidence > best.confidence ? current : best, predictions[0]);
-
-        // Apply win level adjustment
-        if (winLevel >= MAX_WIN_LEVEL) {
-            bestPrediction.prediction = bestPrediction.prediction === "BIG" ? "SMALL" : "BIG"; // Invert prediction
-            bestPrediction.confidence = Math.max(0.35, bestPrediction.confidence * 0.5); // Reduce confidence
-            // winLevel = 0; // Reset winLevel after applying, or it will stick
-            // console.log("Max win level reached, inverting prediction and reducing confidence.");
-        }
-        // console.log("Win Level:", winLevel, "Prediction:", bestPrediction.prediction, "Confidence:", bestPrediction.confidence);
-        return bestPrediction;
-    }
-
-
-    function autoPredict() {
-        let predictionResult = enhancedTrendAnalysis(historyData);
-        lastPrediction = predictionResult.prediction; // Store the chosen prediction
-
-        // Update UI element for active logic
-        const activeLogicElement = document.getElementById('activeLogic');
-        if (activeLogicElement) {
-            activeLogicElement.textContent = 'Logic ' + predictionResult.logic;
-        }
-
-        return {
-            type: predictionResult.prediction,
-            confidence: predictionResult.confidence
-        };
-    }
-
-    function updateLastStatus(actualNumber) {
-        const predictedType = lastPrediction; // Use the stored lastPrediction
-        const actualType = actualNumber >= 5 ? 'BIG' : 'SMALL';
-        const match = predictedType === actualType; // Simplified: direct match of BIG/SMALL
-
-        lastResult = actualNumber; // Store the actual number
-        lastStatus = match ? 'WIN' : 'LOSS';
-
-        if (match) {
-            winLevel = Math.min(winLevel + 1, MAX_WIN_LEVEL + 1); // Allow it to go one over to trigger reset *after* this win
-        } else {
-            winLevel = 0; // Reset on loss
-        }
-        // console.log(`Prediction: ${predictedType}, Actual: ${actualNumber} (${actualType}), Status: ${lastStatus}, WinLevel: ${winLevel}`);
-        return lastStatus;
-    }
-
-
-    async function fetchGameResult() {
-        try {
-            // Using a CORS proxy for development if direct API access is blocked by CORS
-            // const proxyUrl = 'https://cors-anywhere.herokuapp.com/'; // Example proxy
-            const apiUrl = "https://api.bdg88zf.com/api/webapi/GetNoaverageEmerdList";
-            let response = await fetch(apiUrl, { // Removed proxyUrl for direct attempt
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    pageSize: 10, // Fetch a few recent results
-                    pageNo: 1,
-                    typeId: 1, // Assuming '1' is for Wingo 1 Min
-                    language: 0, // Or appropriate language code
-                    random: "4a0522c6ecd8410496260e686be2a57c", // These might need to be dynamic or valid
-                    signature: "334B5E70A0C9B8918B0B15E517E2069C",
-                    timestamp: Math.floor(Date.now() / 1000)
-                })
+        function fetchGlobalMessage() { /* ... (same as original) ... */
+            const messageRef = db.ref("predictorGlobalMessage");
+            messageRef.on("value", snapshot => {
+                const messageData = snapshot.val();
+                if (messageData && messageData.message && messageData.id !== currentGlobalMessageId) {
+                    globalMessageText.textContent = messageData.message;
+                    globalMessageBar.style.display = 'block';
+                    currentGlobalMessageId = messageData.id; 
+                } else if (!messageData || !messageData.message) {
+                    globalMessageBar.style.display = 'none';
+                    currentGlobalMessageId = null;
+                }
+            }, error => {
+                console.error("Error fetching global message:", error);
+                globalMessageBar.style.display = 'none';
             });
-            if (!response.ok) {
-                console.error("API Error Status:", response.status, response.statusText);
-                const errorBody = await response.text();
-                console.error("API Error Body:", errorBody);
+        }
+        function switchPage(pageId) { /* ... (same as original) ... */
+            pages.forEach(page => page.classList.remove('active'));
+            const targetPage = document.getElementById(`page-${pageId}`);
+            if (targetPage) targetPage.classList.add('active');
+            else document.getElementById('page-main').classList.add('active'); 
+
+            pageButtons.forEach(button => {
+                button.classList.remove('active');
+                if (button.dataset.page === pageId) button.classList.add('active');
+            });
+            localStorage.setItem(APP_STORAGE_PREFIX + 'active_tab', pageId);
+        }
+        async function fetchGameResultFromAPI() { /* ... (same as original) ... */
+            updateAPIStatus("Fetching...", "bg-yellow-100 text-yellow-600", false); 
+            try {
+                const cacheBuster = `cb=${new Date().getTime()}`;
+                const apiUrl = `https://api.bdg88zf.com/api/webapi/GetNoaverageEmerdList?${cacheBuster}`; 
+
+                const response = await fetch(apiUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        pageSize: 10, pageNo: 1, typeId: 1, language: 0,
+                        random: "4a0522c6ecd8410496260e686be2a57c", 
+                        signature: "334B5E70A0C9B8918B0B15E517E2069C", 
+                        timestamp: Math.floor(Date.now() / 1000)
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error(`API Error: ${response.status} - ${errorText}`);
+                    updateAPIStatus(`Error: ${response.status}`, "bg-red-100 text-red-600", true);
+                    return null;
+                }
+                const data = await response.json();
+
+                if (!data || typeof data !== 'object' || !data.data || typeof data.data !== 'object' || !Array.isArray(data.data.list)) {
+                    console.error("API Error: Invalid data structure.", data);
+                    updateAPIStatus("Invalid API Data", "bg-red-100 text-red-600", true);
+                    return null;
+                }
+                updateAPIStatus("Live", "bg-green-100 text-green-600", true); 
+                return data.data.list; 
+            } catch (e) {
+                console.error("Fetch API Error:", e);
+                updateAPIStatus("Fetch Failed", "bg-red-100 text-red-600", true);
                 return null;
             }
-            let data = await response.json();
-            return data?.data?.list || [];
-        } catch (e) {
-            console.error("API Fetch Error:", e);
-            return null;
         }
-    }
-
-    async function fetchWingoResults() {
-        let results = await fetchGameResult();
-        if (!results || results.length === 0) {
-            showToast("Failed to fetch Wingo results or no results available.");
-            return;
+        function updateAPIStatus(message, styleClass, autoHide) { /* ... (same as original) ... */
+             if (apiStatusEl) {
+                apiStatusEl.textContent = `API: ${message}`;
+                apiStatusEl.className = `text-xs px-1.5 py-0.5 rounded-md ${styleClass} opacity-100`;
+                if (apiStatusTimeoutId) clearTimeout(apiStatusTimeoutId);
+                if (autoHide) {
+                    apiStatusTimeoutId = setTimeout(() => {
+                        if (apiStatusEl) apiStatusEl.classList.add('opacity-0');
+                    }, 2000); 
+                }
+            }
         }
-
-        const container = document.getElementById("wingoResultsContainer");
-        if (!container) return;
-
-        container.innerHTML = results.slice(0, 10).map(item => { // Display last 10
-            const number = Number(item.number);
-            const type = number >= 5 ? "BIG" : "SMALL";
-            const borderColor = type === "BIG" ? "border-blue-500" : "border-green-500";
-            return `
-            <div class="history-card flex justify-between items-center p-4 bg-gray-800 rounded-lg border-l-4 ${borderColor} shadow-md">
-                <div class="flex-1">
-                <div class="text-gray-400 text-sm"><i class="fas fa-calendar mr-2"></i>Period-${item.issueNumber.slice(-4)}</div>
-                <div class="text-white"><i class="fas fa-dice mr-2"></i>Number: ${number}</div>
-                <div class="text-white"><i class="fas fa-trophy mr-2"></i>Type: ${type}</div>
-                </div>
-            </div>`;
-        }).join("");
-    }
-
-    function showToast(message) {
-        const toast = document.createElement("div");
-        toast.className = "toast";
-        toast.innerText = message;
-        document.body.appendChild(toast);
-        // Trigger reflow to ensure animation plays
-        toast.offsetHeight;
-        toast.classList.add('show');
-
-        setTimeout(() => {
-            toast.classList.remove('show');
-            // Remove element after animation (optional, depends on CSS for hiding)
-            setTimeout(() => toast.remove(), 500);
-        }, 3000); // Show for 3 seconds
-    }
-
-
-    async function updatePrediction() {
-        if (!isServerOn) {
-            clearPredictionDisplay();
-            saveGameState(); // Save current (potentially offline) state
-            return;
+        function getOppositeNumber(prediction) { /* ... (same as original) ... */
+            const small = [0, 1, 2, 3, 4]; const big = [5, 6, 7, 8, 9];
+            let arr = prediction === "BIG" ? small : big;
+            return arr[Math.floor(Math.random() * arr.length)];
         }
+        function detailedTrendAnalysisModule(recentHistory, windowSize = 7) { /* ... (same as original) ... */
+            const historySlice = recentHistory.slice(0, windowSize);
+            if (historySlice.length < 2) return { prediction: null, confidence: 0.3, weight: 1.6, type: "Trend", logic: "Tr-Insuff" }; // Higher base weight
 
-        let results = await fetchGameResult();
-        if (!results || results.length === 0) {
-            // console.log("No new results or API error, skipping update.");
-            // Optionally show a subtle indicator that data couldn't be fetched
-            return;
-        }
-
-        let currentResult = results[0]; // The most recent result from API
-
-        // If the latest period from API is the same as the last one we processed, do nothing.
-        if (currentResult.issueNumber === lastFetchedPeriod) {
-            // console.log("Data for period", currentResult.issueNumber, "already processed.");
-            return;
-        }
-
-        // --- Update previous pending prediction ---
-        if (historyData.length > 0 && historyData[0].resultStatus === "Pending") {
-            const pendingEntry = historyData[0];
-            // We need the result for the period *before* currentResult.issueNumber
-            // Find the result that matches pendingEntry.period (which is issueNumber.slice(-4))
-            const previousPeriodFull = currentResult.issueNumber; // This is the *current* period from API
-            // We need to find the result for the period that `pendingEntry` was for.
-            // The API gives latest first. So results[1] would be for the period before results[0] IF it exists.
-            // This logic assumes the API returns results in descending order of period.
-            let resultForPending = null;
-            // The `pendingEntry.period` is the one we made a prediction FOR.
-            // The `currentResult.issueNumber` is the period that JUST finished.
-            // So, `currentResult` IS the result for our `pendingEntry.period` if the numbers match up.
-            if (pendingEntry.period === currentResult.issueNumber.slice(-4)) {
-                 resultForPending = currentResult;
+            let currentStreak = 0;
+            let currentStreakType = null;
+            if (historySlice.length > 0 && historySlice[0].resultType) {
+                currentStreakType = historySlice[0].resultType;
+                currentStreak = 1;
+                for (let i = 1; i < historySlice.length; i++) {
+                    if (historySlice[i].resultType === currentStreakType) currentStreak++;
+                    else break;
+                }
             }
 
+            let alternations = 0;
+            if (historySlice.length >= 2) {
+                for (let i = 0; i < historySlice.length - 1; i++) {
+                    if (historySlice[i].resultType && historySlice[i+1].resultType && historySlice[i].resultType !== historySlice[i+1].resultType) alternations++;
+                    else break; 
+                }
+            }
+            
+            let prediction = null;
+            let confidence = 0.45; // Slightly higher base confidence for trend signals
+            let logic = `Tr(S${currentStreak}${currentStreakType ? currentStreakType[0] : ''}A${alternations})`;
 
-            if (resultForPending) {
-                const actualNumber = Number(resultForPending.number);
-                const status = updateLastStatus(actualNumber); // updateLastStatus uses `lastPrediction` which was set when pendingEntry was created
-                const resultType = actualNumber >= 5 ? "BIG" : "SMALL";
+            if (currentStreak >= 3) { 
+                prediction = currentStreakType; 
+                confidence = 0.72 + Math.min(0.23, (currentStreak - 3) * 0.08); 
+            } else if (currentStreak === 2) { 
+                prediction = currentStreakType; 
+                confidence = 0.65;
+            } else if (alternations >= 3) { 
+                prediction = historySlice[0].resultType === "BIG" ? "SMALL" : "BIG"; 
+                confidence = 0.70 + Math.min(0.20, (alternations - 2) * 0.07);
+            } else if (alternations === 2) { 
+                 prediction = historySlice[0].resultType === "BIG" ? "SMALL" : "BIG"; 
+                 confidence = 0.62;
+            } else if (currentStreak === 1 && alternations === 0 && historySlice.length >=2 && historySlice[0].resultType !== historySlice[1].resultType) { 
+                 prediction = historySlice[0].resultType === "BIG" ? "SMALL" : "BIG"; 
+                 confidence = 0.58;
+            } else if (currentStreak === 1 && historySlice.length === 1) { 
+                prediction = historySlice[0].resultType === "BIG" ? "SMALL" : "BIG"; 
+                confidence = 0.52;
+            }
+            
+            return { prediction, confidence: parseFloat(confidence.toFixed(2)), weight: 1.6 * (moduleEffectiveness.Trend?.weightMultiplier || 1.0), type: "Trend", logic };
+        }
+        function dominanceAnalysisModule(recentHistory, windowSize = 10, baseWeight = 1.0) { /* ... (same as original) ... */
+            const historySlice = recentHistory.slice(0, windowSize);
+            if (historySlice.length < windowSize / 2) return { prediction: null, confidence: 0.3, weight: baseWeight, type: "Dominance", logic: `Dom${windowSize}-Insuff` };
+            
+            const bigCount = historySlice.filter(h => h.resultType === "BIG").length;
+            const smallCount = historySlice.filter(h => h.resultType === "SMALL").length;
+            const total = bigCount + smallCount;
+            if (total === 0) return { prediction: null, confidence: 0.3, weight: baseWeight, type: "Dominance", logic: `Dom${windowSize}-NoBS` };
+            
+            const dominanceFactor = total > 0 ? (Math.max(bigCount, smallCount) / total) : 0.5; 
+            let dominantType = null;
+            if (bigCount > smallCount) dominantType = "BIG";
+            else if (smallCount > bigCount) dominantType = "SMALL";
 
-                pendingEntry.result = actualNumber;
-                pendingEntry.resultStatus = status;
-                pendingEntry.resultType = resultType;
-                pendingEntry.calculation = `Actual: ${actualNumber} (${resultType})`;
+            let prediction = dominantType; 
+            let confidence = 0.42 + (dominanceFactor - 0.5) * 0.85; 
+            if (!dominantType) confidence = 0.3; 
 
-                // Update UI for the now-resolved prediction
-                document.getElementById("resultStatus").innerText = `${status} (${actualNumber})`;
-                document.getElementById("resultStatus").style.color = status === "WIN" ? "var(--win-green)" : "var(--loss-red)";
+            return { prediction, confidence: parseFloat(confidence.toFixed(2)), weight: baseWeight * (moduleEffectiveness.Dominance?.weightMultiplier || 1.0), type: "Dominance", logic: `Dom${windowSize}(${dominantType ? dominantType[0] : 'E'}${dominanceFactor.toFixed(1)})` };
+        }
+        function recencyBiasAnalysisModule(recentHistory) { /* ... (same as original) ... */
+            if (recentHistory.length === 0 || !recentHistory[0].resultType) return { prediction: null, confidence: 0.3, weight: 1.4, type: "Recency", logic: "Rec-Empty" }; // Higher weight
+            
+            const last1 = recentHistory[0].resultType;
+            let prediction = last1; 
+            let confidence = 0.60; // Higher base for recency
+            let last2 = null; 
+
+            if (recentHistory.length >= 2 && recentHistory[1].resultType) {
+                last2 = recentHistory[1].resultType; 
+                if (last1 === last2) { 
+                    prediction = last1; confidence = 0.70; 
+                } else { 
+                    prediction = last1; confidence = 0.65; 
+                }
+            }
+             if (recentHistory.length >= 3 && recentHistory[2].resultType && last2 !== null) { 
+                const last3 = recentHistory[2].resultType;
+                if (last1 === last2 && last1 === last3) { 
+                    prediction = last1; confidence = 0.78; 
+                } else if (last1 !== last2 && last1 === last3) { 
+                     prediction = last2; confidence = 0.72; 
+                }
+            }
+            const l1Char = last1 ? last1[0] : 'N';
+            const l2Char = last2 ? last2[0] : '';
+            const l3Char = (recentHistory.length >=3 && recentHistory[2].resultType) ? recentHistory[2].resultType[0] : '';
+
+            return { prediction, confidence: parseFloat(confidence.toFixed(2)), weight: 1.4 * (moduleEffectiveness.Recency?.weightMultiplier || 1.0), type: "Recency", logic: `Rec(${l1Char}${l2Char}${l3Char})` };
+        }
+        function volatilityAndConsistencyModule(recentHistory, windowSize = 8) { /* ... (same as original) ... */
+            const historySlice = recentHistory.slice(0, windowSize);
+            if (historySlice.length < 2) return { volatilityScore: 0.5, consistencyStreak: 0, type: "Volatility", logic: "Vol-Insuff" };
+
+            let changes = 0;
+            for (let i = 0; i < historySlice.length - 1; i++) {
+                if (historySlice[i].resultType && historySlice[i+1].resultType && historySlice[i].resultType !== historySlice[i+1].resultType) {
+                    changes++;
+                }
+            }
+            const volatilityScore = changes / (historySlice.length - 1);
+
+            let consistencyStreak = 0;
+            if (historySlice.length > 0 && historySlice[0].resultType) {
+                const lastType = historySlice[0].resultType;
+                for (const item of historySlice) {
+                    if (item.resultType === lastType) consistencyStreak++;
+                    else break;
+                }
+            }
+            return { volatilityScore: parseFloat(volatilityScore.toFixed(2)), consistencyStreak, type: "Volatility", logic: `Vol(V${volatilityScore.toFixed(1)}C${consistencyStreak})` };
+        }
+        function complexPatternDetectorModule(recentHistory, windowSize = 6) { /* ... (same as original) ... */
+            const historySlice = recentHistory.slice(0, windowSize).map(h => h.resultType).filter(Boolean); 
+            if (historySlice.length < 3) return { prediction: null, confidence: 0.3, weight: 1.25, type: "CP", logic: "CP-Insuff" }; // Min 3 for CP
+
+            const s = historySlice.join(''); 
+            let prediction = null;
+            let confidence = 0;
+            let logic = "CP-None";
+
+            // Prioritize longer, more distinct patterns
+            if (s.startsWith("BBSS")) { prediction = "BIG"; confidence = 0.72; logic = "CP:BBSS>B"; }
+            else if (s.startsWith("SSBB")) { prediction = "SMALL"; confidence = 0.72; logic = "CP:SSBB>S"; }
+            else if (s.startsWith("BSSB")) { prediction = "SMALL"; confidence = 0.70; logic = "CP:BSSB>S"; }
+            else if (s.startsWith("SBBS")) { prediction = "BIG"; confidence = 0.70; logic = "CP:SBBS>B"; }
+            else if (s.startsWith("BBBS")) { prediction = "SMALL"; confidence = 0.75; logic = "CP:BBBS>S_Brk"; } 
+            else if (s.startsWith("SSSB")) { prediction = "BIG"; confidence = 0.75; logic = "CP:SSSB>B_Brk"; }  
+            else if (s.startsWith("BSBS")) { prediction = "BIG"; confidence = 0.68; logic = "CP:BSBS>B_Alt"; } 
+            else if (s.startsWith("SBSB")) { prediction = "SMALL"; confidence = 0.68; logic = "CP:SBSB>S_Alt"; }
+            else if (s.startsWith("BBSB")) { prediction = "BIG"; confidence = 0.65; logic = "CP:BBSB>B"; } 
+            else if (s.startsWith("SSBS")) { prediction = "SMALL"; confidence = 0.65; logic = "CP:SSBS>S"; }
+            // 3-length patterns (lower confidence, act as secondary signals)
+            else if (s.startsWith("BSB")) { prediction = "SMALL"; confidence = 0.60; logic = "CP:BSB>S_Alt3"; } 
+            else if (s.startsWith("SBS")) { prediction = "BIG"; confidence = 0.60; logic = "CP:SBS>B_Alt3"; }
+            else if (s.startsWith("BBB") && historySlice.length >=3) { prediction = "SMALL"; confidence = 0.62; logic = "CP:BBB>S_Brk3"; } 
+            else if (s.startsWith("SSS") && historySlice.length >=3) { prediction = "BIG"; confidence = 0.62; logic = "CP:SSS>B_Brk3"; }
+            else if (s.startsWith("BB") && historySlice.length === 2) { prediction = "BIG"; confidence = 0.55; logic = "CP:BB>B_Cont2";} // Simple double follow
+            else if (s.startsWith("SS") && historySlice.length === 2) { prediction = "SMALL"; confidence = 0.55; logic = "CP:SS>S_Cont2";}
+
+
+            return { prediction, confidence: parseFloat(confidence.toFixed(2)), weight: 1.25 * (moduleEffectiveness.CP?.weightMultiplier || 1.0), type: "CP", logic };
+        }
+        function rhythmAndCycleAnalysisModule(recentHistory, windowSize = 15) { /* ... (same as original) ... */
+            const historySlice = recentHistory.slice(0, windowSize);
+            if (historySlice.length < 5) return { phase: "UNCLEAR", confidence: 0.4, weight: 0.7, type: "Rhythm", logic: "Rhy-Insuff" };
+
+            let alternations = 0;
+            let streaksOfTwo = 0;
+            let streaksOfThreePlus = 0;
+
+            for (let i = 0; i < historySlice.length - 1; i++) {
+                if (historySlice[i].resultType && historySlice[i+1].resultType) {
+                    if (historySlice[i].resultType !== historySlice[i+1].resultType) alternations++;
+                    else { // Start of a potential streak
+                        if (i + 2 < historySlice.length && historySlice[i+1].resultType === historySlice[i+2].resultType) {
+                            streaksOfThreePlus++;
+                            i += 2; // Skip checked items
+                        } else {
+                            streaksOfTwo++;
+                            i += 1; // Skip checked item
+                        }
+                    }
+                }
+            }
+            const alternationRatio = alternations / (historySlice.length -1);
+            let phase = "MIXED";
+            let confidence = 0.5;
+
+            if (alternationRatio > 0.65) { phase = "CHOPPY"; confidence = 0.65; } // Highly alternating
+            else if (streaksOfThreePlus > streaksOfTwo && streaksOfThreePlus > alternations / 2) { phase = "STREAKY"; confidence = 0.65; } // More long streaks
+            else if (streaksOfTwo > streaksOfThreePlus && streaksOfTwo > alternations / 2) { phase = "SHORT_STREAKS"; confidence = 0.60;}
+            
+            return { phase, confidence: parseFloat(confidence.toFixed(2)), weight: 0.7 * (moduleEffectiveness.Rhythm?.weightMultiplier || 1.0), type: "Rhythm", logic: `Rhy(${phase})` };
+        }
+        function getWeightedEnsemblePrediction(signals, volatilityContext, rhythmContext, isExtremeLevelReached, streakTypeToBreak) { /* ... (same as original) ... */
+            let bigScore = 0;
+            let smallScore = 0;
+            let logicParts = [];
+            
+            if (!signals || signals.length === 0) return { prediction: (Date.now() % 2 === 0) ? "BIG" : "SMALL", confidence: 0.35, logic: "EnsV6-NoSignals" };
+
+            signals.forEach(signal => {
+                if (!signal || signal.prediction === null || typeof signal.confidence !== 'number' || typeof signal.weight !== 'number') {
+                    // Allow Rhythm type to pass even if prediction is null, as it's for context
+                    if (signal && signal.type === "Rhythm" && typeof signal.confidence === 'number' && typeof signal.weight === 'number') {
+                        // Don't add to bigScore/smallScore, but allow its logic to be part of the final logic string
+                    } else {
+                        return; 
+                    }
+                }
+
+                let currentWeight = signal.weight;
+                // Contextual Adjustments (Volatility & Rhythm)
+                if (volatilityContext) {
+                    if (volatilityContext.volatilityScore > 0.70) { 
+                        if (signal.type === "Trend" && signal.confidence > 0.60) currentWeight *= 0.50; 
+                        if (signal.type === "Recency") currentWeight *= 1.35; 
+                        if (signal.type === "CP") currentWeight *= 0.60; 
+                    } else if (volatilityContext.consistencyStreak >= 3) { 
+                        if (signal.type === "Trend" && signal.confidence > 0.50) currentWeight *= 1.45; 
+                        if (signal.type === "Recency" && volatilityContext.consistencyStreak >=4) currentWeight *= 1.30; 
+                    }
+                }
+                if (rhythmContext) {
+                    if (rhythmContext.phase === "STREAKY" && signal.type === "Trend") currentWeight *= 1.2;
+                    else if (rhythmContext.phase === "CHOPPY" && (signal.type === "Trend" || signal.type === "CP")) currentWeight *= 0.7; 
+                    else if (rhythmContext.phase === "CHOPPY" && signal.type === "Recency") currentWeight *= 1.15; 
+                }
+
+                if (isExtremeLevelReached && streakTypeToBreak) {
+                    if (signal.prediction === streakTypeToBreak) {
+                        currentWeight *= 0.05; 
+                        signal.confidence *= 0.3; 
+                    } else { 
+                        currentWeight *= 2.8; 
+                        signal.confidence = Math.min(0.95, signal.confidence * 1.4); 
+                    }
+                }
+
+                const scoreContribution = signal.confidence * currentWeight;
+                if (signal.prediction === "BIG") {
+                    bigScore += scoreContribution;
+                } else if (signal.prediction === "SMALL") {
+                    smallScore += scoreContribution;
+                }
+                logicParts.push(`${signal.type.substring(0,3)}:${signal.prediction ? signal.prediction[0]:'N'}(${signal.confidence.toFixed(1)}*${currentWeight.toFixed(1)})`);
+            });
+
+            if (bigScore === 0 && smallScore === 0) { 
+                const breakPrediction = isExtremeLevelReached && streakTypeToBreak ? (streakTypeToBreak === "BIG" ? "SMALL" : "BIG") : (Date.now() % 2 === 0 ? "BIG" : "SMALL");
+                return { prediction: breakPrediction, confidence: 0.35, logic: `EnsV6-ZeroScores${isExtremeLevelReached ? 'ExtBrk' : ''}` };
+            }
+
+            const finalPrediction = bigScore >= smallScore ? "BIG" : "SMALL";
+            
+            const totalScore = bigScore + smallScore;
+            let finalConfidence = totalScore > 0 ? (Math.abs(bigScore - smallScore) / totalScore) : 0;
+            finalConfidence = 0.38 + (finalConfidence * 0.57); 
+
+            const agreeingSignals = signals.filter(s => s.prediction === finalPrediction);
+            const numAgreeing = agreeingSignals.length;
+            const numTotalValidSignals = signals.filter(s => s.prediction !== null).length;
+
+            if (numTotalValidSignals > 0) {
+                const agreementRatio = numAgreeing / numTotalValidSignals;
+                if (agreementRatio >= 0.70 && numTotalValidSignals >= 2) { 
+                    const avgConfidenceOfAgreeing = agreeingSignals.reduce((sum, s) => sum + s.confidence, 0) / (numAgreeing || 1);
+                    finalConfidence = Math.min(0.95, (finalConfidence + avgConfidenceOfAgreeing) / 1.7); 
+                } else if (agreementRatio <= 0.30 && numTotalValidSignals >= 3) { 
+                    finalConfidence = Math.max(0.35, finalConfidence * 0.55); 
+                }
+            }
+            
+            if (isExtremeLevelReached) { 
+                finalConfidence = Math.min(finalConfidence, 0.40); 
+                logicParts.push("EXTREME_FORCE_ADJ");
+            }
+
+            return { 
+                prediction: finalPrediction, 
+                confidence: parseFloat(Math.max(0.35, Math.min(0.95, finalConfidence)).toFixed(2)), 
+                logic: `Ens(${logicParts.join('|').substring(0,35)})` 
+            };
+        }
+        function advancedPredictionAlgorithm(periodShortToPredict, historyForLogic, currentAlgoWinLevel, isExtremeLevel) { /* ... (same as original) ... */
+            const resolvedHistory = historyForLogic.filter(h => h.status !== "Pending" && typeof h.result === 'number' && (h.resultType === "BIG" || h.resultType === "SMALL")).slice(0, 25); 
+
+            let signals = [];
+            if (resolvedHistory.length >= 1) { 
+                signals.push(detailedTrendAnalysisModule(resolvedHistory, 7));
+                signals.push(dominanceAnalysisModule(resolvedHistory, 5, 1.1)); 
+                signals.push(dominanceAnalysisModule(resolvedHistory, 12, 0.9)); 
+                signals.push(recencyBiasAnalysisModule(resolvedHistory)); 
+                signals.push(complexPatternDetectorModule(resolvedHistory, 6));
+            }
+            
+            const volatilityContext = volatilityAndConsistencyModule(resolvedHistory, 8);
+            const rhythmContext = rhythmAndCycleAnalysisModule(resolvedHistory, 15);
+            signals.push({prediction: null, confidence: rhythmContext.confidence, weight: rhythmContext.weight, type: "Rhythm", logic: rhythmContext.logic}); 
+            
+            let streakTypeToBreak = null;
+            let predictionToBreakStreak = null;
+            if(isExtremeLevel && currentAIPrediction && currentAIPrediction.prediction) {
+                 streakTypeToBreak = currentAlgoWinLevel > 0 ? currentAIPrediction.prediction : (currentAIPrediction.prediction === "BIG" ? "SMALL" : "BIG");
+                 predictionToBreakStreak = streakTypeToBreak === "BIG" ? "SMALL" : "BIG";
+                 console.log(`Extreme Level (${currentAlgoWinLevel}). Current streak type: ${currentAIPrediction.prediction}. Aiming to break with: ${predictionToBreakStreak}`);
+            }
+
+            let combinedPredictionObj;
+            if (signals.filter(s => s.prediction !== null || s.type === "Rhythm").length > 0) { 
+                combinedPredictionObj = getWeightedEnsemblePrediction(signals, volatilityContext, rhythmContext, isExtremeLevel, streakTypeToBreak);
             } else {
-                // console.log("Could not find matching result for pending period:", pendingEntry.period);
+                const breakPrediction = isExtremeLevel && predictionToBreakStreak ? predictionToBreakStreak : (Date.now() % 2 === 0 ? "BIG" : "SMALL");
+                combinedPredictionObj = { prediction: breakPrediction, confidence: 0.38, logic: `FallbackNoSig${isExtremeLevel ? 'ExtBrk':''}` };
             }
-        }
-         // --- Make new prediction for the NEXT period ---
-        const aiDecision = autoPredict(); // This sets `lastPrediction` internally
-        // `lastPrediction` is now set by autoPredict for the upcoming period.
-        lastOppositeNumber = getOppositeNumber(lastPrediction); // Get opposite for the new `lastPrediction`
-        globalPrediction = lastPrediction; // globalPrediction also reflects this new prediction
+            
+            let finalPrediction = combinedPredictionObj.prediction;
+            let finalConfidence = combinedPredictionObj.confidence;
+            let finalLogic = combinedPredictionObj.logic;
 
-        let nextPeriodFull = (BigInt(currentResult.issueNumber) + 1n).toString();
-        let nextPeriodDisplay = nextPeriodFull.slice(-4); // For display
-
-        document.getElementById("periodDisplay").value = nextPeriodDisplay;
-        document.getElementById("predictionDisplay").innerText = globalPrediction;
-        document.getElementById("oppositeNumberDisplay").innerText = lastOppositeNumber;
-        const confidencePercent = Math.round(aiDecision.confidence * 100);
-        document.getElementById("confidenceDisplay").innerText = `${confidencePercent}%`;
-        document.getElementById("progressBarFill").style.width = `${confidencePercent}%`;
-         if (winLevel > MAX_WIN_LEVEL) { // If winLevel exceeded max (e.g., was 2, now 3 after a win)
-            winLevel = 0; // Reset it for the *next* prediction cycle
-            // console.log("Win level reset for next cycle.");
-        }
-
-
-        // Add new pending entry to history
-        historyData.unshift({
-            period: nextPeriodDisplay, // This is the period we are predicting FOR
-            prediction: globalPrediction,
-            oppositeNumber: lastOppositeNumber,
-            result: "-",
-            resultStatus: "Pending",
-            resultType: "-",
-            calculation: "Awaiting result..."
-        });
-
-        updateHistory(); // Refresh history display
-        updateStats();   // Refresh stats
-        lastFetchedPeriod = currentResult.issueNumber; // Mark this period as processed
-        saveGameState(); // Save the new state
-    }
-
-
-    function updateHistory() {
-        const container = document.getElementById("historyContainer");
-        if (!container) return;
-
-        container.innerHTML = historyData.slice(0, 20).map((item, index) => { // Show max 20 history items
-            let borderColor = "border-gray-500"; // Default for pending
-            let iconClass = "fas fa-spinner text-yellow-500 animate-spin"; // Default for pending
-            let resultText = "Waiting...";
-            let calculationText = item.calculation || "Awaiting result...";
-
-            if (item.resultStatus === "WIN") {
-                borderColor = "border-green-500";
-                iconClass = "fas fa-check-circle text-green-500 win-animation";
-                resultText = item.result;
-            } else if (item.resultStatus === "LOSS") {
-                borderColor = "border-red-500";
-                iconClass = "fas fa-xmark-circle text-red-500 loss-animation";
-                resultText = item.result;
+            if (isExtremeLevel && predictionToBreakStreak && finalPrediction !== predictionToBreakStreak && !finalLogic.includes("FLIP")) { 
+                console.log(`ExtremeLvlOverride V6: Ensemble picked ${finalPrediction}, but forcing ${predictionToBreakStreak} due to level ${currentAlgoWinLevel}.`);
+                finalPrediction = predictionToBreakStreak;
+                finalConfidence = 0.37; 
+                finalLogic = `ExtLvlOVER(${currentAlgoWinLevel})!${predictionToBreakStreak[0]}`;
             }
 
-            return `
-            <div class="history-card flex justify-between items-center p-4 bg-gray-800 rounded-lg border-l-4 ${borderColor} shadow-md mb-2">
-                <div class="flex-1">
-                <div class="text-gray-400 text-sm"><i class="fas fa-calendar mr-2"></i>P-${item.period}</div>
-                <div class="text-white"><i class="fas fa-bullseye mr-2"></i>Prediction: ${item.prediction} (Opp: ${item.oppositeNumber})</div>
-                <div class="text-white"><i class="fas fa-dice mr-2"></i>Result: ${resultText}</div>
-                <div class="text-gray-400 text-xs"><i class="fas fa-calculator mr-2"></i>${calculationText}</div>
-                <div class="text-white font-semibold"><i class="fas fa-trophy mr-2"></i>Status: ${item.resultStatus}</div>
-                </div>
-                <div class="history-actions flex flex-col items-center gap-2 ml-2">
-                <i class="${iconClass} text-xl"></i>
-                <i class="fas fa-trash-alt text-gray-500 hover:text-red-500 cursor-pointer text-sm" onclick="deleteHistory(${index})"></i>
-                </div>
-            </div>`;
-        }).join("");
-    }
+            if (isExtremeLevel) { 
+                 const typeThatCausedExtreme = currentAlgoWinLevel > 0 ? 
+                        (currentAIPrediction?.prediction) : 
+                        (currentAIPrediction?.prediction === "BIG" ? "SMALL" : "BIG");
 
-    function updateStats() {
-        const wins = historyData.filter(item => item.resultStatus === "WIN").length;
-        const losses = historyData.filter(item => item.resultStatus === "LOSS").length;
-        const totalCompleted = wins + losses;
-        const accuracy = totalCompleted > 0 ? ((wins / totalCompleted) * 100).toFixed(2) : 0;
+                if (typeThatCausedExtreme && finalPrediction === typeThatCausedExtreme) { 
+                    console.warn(`ULTRA FORCE FLIP V6: Ensemble still predicted ${finalPrediction} at extreme level ${currentAlgoWinLevel}. Forcing FLIP for period ${periodShortToPredict}.`);
+                    finalPrediction = finalPrediction === "BIG" ? "SMALL" : "BIG";
+                    finalConfidence = 0.35; 
+                    finalLogic = `FORCE_FLIP!!(${currentAlgoWinLevel})`;
+                }
+            }
+            
+            const oppositeNum = getOppositeNumber(finalPrediction);
 
-        const winsEl = document.getElementById('wins');
-        const lossesEl = document.getElementById('losses');
-        const accuracyEl = document.getElementById('accuracy');
-        const winLevelEl = document.getElementById('winLevelDisplay');
-
-
-        if(winsEl) winsEl.textContent = wins;
-        if(lossesEl) lossesEl.textContent = losses;
-        if(accuracyEl) accuracyEl.textContent = `${accuracy}%`;
-        if(winLevelEl) winLevelEl.textContent = winLevel > MAX_WIN_LEVEL ? MAX_WIN_LEVEL : winLevel; // Display capped winLevel
-    }
-
-    function deleteHistory(index) {
-        historyData.splice(index, 1);
-        showToast("History entry deleted successfully");
-        updateHistory();
-        updateStats();
-        saveGameState();
-    }
-
-    function showClearHistoryModal() {
-        document.getElementById("clearHistoryModal").classList.remove("hidden");
-    }
-    function hideClearHistoryModal() {
-        document.getElementById("clearHistoryModal").classList.add("hidden");
-    }
-    function confirmClearHistory() {
-        clearHistory();
-        showToast("All history deleted successfully");
-        hideClearHistoryModal();
-    }
-
-    function clearHistory() {
-        historyData = [];
-        winLevel = 0;
-        // Reset other relevant state variables if needed, but keep lastFetchedPeriod to avoid reprocessing
-        // lastFetchedPeriod = null;
-        lastResult = null;
-        lastPrediction = null;
-        lastStatus = null;
-        lastOppositeNumber = null;
-        globalPrediction = null;
-
-        updateHistory();
-        updateStats();
-        saveGameState(); // Save the cleared state
-    }
-
-
-    // --- DOMContentLoaded ---
-    document.addEventListener('DOMContentLoaded', function() {
-      // console.log('DOM fully loaded and parsed');
-      startSparkleEffect(); // Call placeholder
-      checkServerStatus();  // Initial check
-      listenForCustomMessages(); // Start listening
-
-      const deviceIdSpan = document.getElementById('deviceId');
-      if (deviceIdSpan) {
-        deviceIdSpan.textContent = getDeviceId();
-        deviceIdSpan.addEventListener('click', copyDeviceId);
-        // For touch devices, touchend might be more reliable than click for actions like copy
-        deviceIdSpan.addEventListener('touchend', (e) => {
-            e.preventDefault(); // Prevent potential duplicate click event
-            copyDeviceId();
-        });
-      } else {
-        console.error('Device ID span element not found.');
-      }
-
-      const closeInvalidKeyBtn = document.getElementById('closeInvalidKeyBtn');
-      if (closeInvalidKeyBtn) {
-        closeInvalidKeyBtn.addEventListener('click', hideInvalidKeyPopup);
-      } else {
-        console.error('Close invalid key button not found.');
-      }
-
-      const closeAdminMessageBtn = document.getElementById('closeAdminMessageBtn');
-      if (closeAdminMessageBtn) {
-        closeAdminMessageBtn.addEventListener('click', () => {
-          hideAdminMessagePopup();
-          isShowingMessage = false; // Allow next message in queue to show
-          processMessageQueue();
-        });
-      } else {
-        console.error('Close admin message button not found.');
-      }
-
-      // Check if user was already logged in (e.g. page refresh in dashboard/game)
-      const storedKey = localStorage.getItem("accessKey_wingo");
-      if (storedKey && document.getElementById('loginSection').style.display !== 'none') {
-          // If a key is stored and we are on the login page, attempt to go to dashboard
-          // This simulates auto-login if the key is still valid.
-          // The login() function itself will validate the key against Firebase.
-          // document.getElementById("accessKey").value = storedKey; // Pre-fill for convenience
-          // login(); // This might be too aggressive, consider a "Continue session?" prompt
-          // For now, let's just populate dashboard if key exists.
-          // The login function handles the transition.
-          // If we are on login page, user needs to click login.
-          // If we want to auto-redirect, more logic is needed here or in login()
-      }
-
-
-      // Prediction update interval
-      setInterval(() => {
-        if (isServerOn && document.getElementById('gameSection').style.display === 'block') { // Only update if in game section
-          updatePrediction();
-        } else if (!isServerOn) {
-          clearPredictionDisplay(); // Ensure display is cleared if server goes offline
+            return {
+                ...DEFAULT_PREDICTION_ITEM_STRUCTURE,
+                id: periodShortToPredict + "_ai_" + Date.now(), period: periodShortToPredict,
+                predictionTime: new Date().toISOString(), prediction: finalPrediction,
+                oppositeNumber: oppositeNum, confidence: finalConfidence,
+                logic: finalLogic.substring(0, 50), status: "Pending",
+            };
         }
-      }, 30000); // Fetch new results every 30 seconds
-    });
+        function updateModuleEffectiveness(logicString, predictionStatus) { /* ... (same as original) ... */
+            if (!logicString) return;
+            let mainModuleType = null;
+            if (logicString.startsWith("Ens(")) {
+                const ensContent = logicString.substring(4, logicString.indexOf(')'));
+                const firstSignal = ensContent.split('|')[0];
+                if (firstSignal && firstSignal.includes(':')) {
+                    mainModuleType = firstSignal.substring(0, firstSignal.indexOf(':'));
+                }
+            } else if (logicString.includes("FLIP") || logicString.includes("ExtLvl")) {
+                return; 
+            } else { 
+                 const parts = logicString.match(/^([A-Za-z]+)/); 
+                 if (parts && parts[1]) {
+                    const keyMap = { "Tr": "Trend", "Dom": "Dominance", "Rec": "Recency", "CP": "CP", "Vol": "Volatility", "Rhy": "Rhythm" };
+                    mainModuleType = keyMap[parts[1]];
+                 }
+            }
 
-  </script>
+            if (mainModuleType && moduleEffectiveness[mainModuleType]) {
+                if (predictionStatus === "WIN") {
+                    moduleEffectiveness[mainModuleType].wins = (moduleEffectiveness[mainModuleType].wins || 0) + 1;
+                } else if (predictionStatus === "LOSS") {
+                    moduleEffectiveness[mainModuleType].losses = (moduleEffectiveness[mainModuleType].losses || 0) + 1;
+                }
+        
+                const total = moduleEffectiveness[mainModuleType].wins + moduleEffectiveness[mainModuleType].losses;
+                if (total >= 3) { 
+                    let ratio = moduleEffectiveness[mainModuleType].wins / total;
+                    let currentMultiplier = moduleEffectiveness[mainModuleType].weightMultiplier || 1.0;
+
+                    if (ratio > 0.60) currentMultiplier = Math.min(1.35, currentMultiplier + 0.07); 
+                    else if (ratio < 0.40) currentMultiplier = Math.max(0.65, currentMultiplier - 0.07); 
+                    else if (ratio >= 0.45 && ratio <= 0.55) currentMultiplier = 1.0; 
+                    
+                    moduleEffectiveness[mainModuleType].weightMultiplier = parseFloat(currentMultiplier.toFixed(2));
+        
+                    if (total >= EFFECTIVENESS_MEMORY) { 
+                        moduleEffectiveness[mainModuleType].wins = Math.round(moduleEffectiveness[mainModuleType].wins / 2); 
+                        moduleEffectiveness[mainModuleType].losses = Math.round(moduleEffectiveness[mainModuleType].losses / 2);
+                        console.log(`Effectiveness memory reset for ${mainModuleType}`);
+                    }
+                }
+                 console.log(`Effectiveness for ${mainModuleType}: W=${moduleEffectiveness[mainModuleType].wins}, L=${moduleEffectiveness[mainModuleType].losses}, Multiplier=${moduleEffectiveness[mainModuleType].weightMultiplier}`);
+            }
+            localStorage.setItem(APP_STORAGE_PREFIX + 'moduleEffectiveness', JSON.stringify(moduleEffectiveness));
+        }
+        async function updateGameData() { /* ... (same as original, with the login/server status checks) ... */
+            const isLoggedIn = !!localStorage.getItem(PREDICTOR_LOGGED_IN_DEVICE_ID_KEY);
+            if (isUpdatingData || !isLoggedIn || !isPredictorServerOn) {
+                 if (!isLoggedIn) console.log("UpdateGameData skipped: User not logged in.");
+                 else if (!isPredictorServerOn) console.log("UpdateGameData skipped: Predictor server is OFF.");
+                 else if (isUpdatingData) console.log("UpdateGameData skipped: Already updating.");
+                return;
+            }
+            isUpdatingData = true;
+            // ... rest of the original updateGameData logic ...
+            const apiResults = await fetchGameResultFromAPI();
+            
+            if (apiResults && apiResults.length > 0) {
+                let newResultsProcessedThisCycle = false;
+                for (const apiResult of apiResults.slice().reverse()) {
+                    if (!apiResult || typeof apiResult.issueNumber !== 'string' || typeof apiResult.number === 'undefined') continue;
+                    const fullPeriod = apiResult.issueNumber;
+                    const periodShort = fullPeriod.slice(-3); 
+                    const apiResultNumber = parseInt(apiResult.number);
+
+                    if (isNaN(apiResultNumber) || apiResultNumber < 0 || apiResultNumber > 9) continue;
+
+                    const existingEntryIndex = allHistory.findIndex(item => item.period === periodShort && item.fullPeriod === fullPeriod);
+                    let entryToUpdate;
+
+                    if (existingEntryIndex !== -1) {
+                        entryToUpdate = { ...allHistory[existingEntryIndex] };
+                        if (entryToUpdate.status !== "Pending") {
+                            if(!entryToUpdate.fullPeriod) entryToUpdate.fullPeriod = fullPeriod;
+                            if(entryToUpdate.result === null) entryToUpdate.result = apiResultNumber;
+                            allHistory[existingEntryIndex] = entryToUpdate;
+                            continue; 
+                        }
+                    } else { 
+                        entryToUpdate = {
+                            ...DEFAULT_PREDICTION_ITEM_STRUCTURE, id: periodShort + "_api_" + Date.now(),
+                            period: periodShort, fullPeriod: fullPeriod,
+                            predictionTime: new Date(apiResult.time || Date.now()).toISOString(),
+                            status: "API_RESULT_ONLY", 
+                        };
+                    }
+                    
+                    entryToUpdate.result = apiResultNumber;
+                    entryToUpdate.resultType = apiResultNumber >= 5 ? "BIG" : "SMALL";
+                    if (apiResultNumber === 0 || apiResultNumber === 5) entryToUpdate.resultColor = apiResultNumber === 0 ? "REDVIOLET" : "GREENVIOLET";
+                    else if (apiResultNumber % 2 === 0) entryToUpdate.resultColor = "RED";
+                    else entryToUpdate.resultColor = "GREEN";
+
+                    if (entryToUpdate.status === "Pending" && entryToUpdate.prediction && (entryToUpdate.prediction === "BIG" || entryToUpdate.prediction === "SMALL")) {
+                        if (entryToUpdate.prediction === entryToUpdate.resultType) {
+                            entryToUpdate.status = "WIN";
+                            localWinLevel = Math.min(localWinLevel + 1, MAX_WIN_LEVEL_STREAK * 2); 
+                        } else {
+                            entryToUpdate.status = "LOSS";
+                            localWinLevel = Math.max(localWinLevel - 1, -MAX_WIN_LEVEL_STREAK * 2); 
+                        }
+                        updateModuleEffectiveness(entryToUpdate.logic, entryToUpdate.status); 
+                    } else if (entryToUpdate.status === "Pending") { 
+                        entryToUpdate.status = "API_RESULT_ONLY"; 
+                        entryToUpdate.prediction = null; 
+                    }
+                    
+                    if (existingEntryIndex !== -1) allHistory[existingEntryIndex] = entryToUpdate;
+                    else allHistory.unshift(entryToUpdate);
+                    newResultsProcessedThisCycle = true;
+                }
+                if (newResultsProcessedThisCycle) {
+                    lastAPIFetchedPeriodFull = apiResults[0].issueNumber; 
+                    localStorage.setItem(APP_STORAGE_PREFIX + 'lastAPIFetchedPeriodFull', lastAPIFetchedPeriodFull);
+                }
+            }
+
+            if (lastAPIFetchedPeriodFull) {
+                const nextPeriodFull = (BigInt(lastAPIFetchedPeriodFull) + 1n).toString();
+                const nextPeriodShort = nextPeriodFull.slice(-3); 
+                const existingPendingForNext = allHistory.find(p => p.period === nextPeriodShort && p.status === "Pending" && p.prediction);
+
+                if (!existingPendingForNext) {
+                    let effectiveWinLevel = localWinLevel;
+                    let isExtremeLevel = Math.abs(localWinLevel) >= MAX_WIN_LEVEL_STREAK;
+
+                    const lastResolvedAIPrediction = allHistory.find(p => p.prediction && p.fullPeriod === lastAPIFetchedPeriodFull && (p.status === "WIN" || p.status === "LOSS"));
+                    if (lastResolvedAIPrediction && lastResolvedAIPrediction.logic && 
+                        (lastResolvedAIPrediction.logic.toLowerCase().includes('flip') || lastResolvedAIPrediction.logic.toLowerCase().includes('extlvl') || lastResolvedAIPrediction.logic.toLowerCase().includes('over') ) && 
+                        isExtremeLevel) { 
+                       console.log(`Win/Loss Level (${localWinLevel}) was extreme, and last pred was a system intervention. Resetting to 0 for Period: ${nextPeriodShort}.`);
+                       localWinLevel = 0; 
+                       effectiveWinLevel = 0;
+                       isExtremeLevel = false; 
+                    }
+                    
+                    const newAIEntry = advancedPredictionAlgorithm(nextPeriodShort, allHistory, effectiveWinLevel, isExtremeLevel);
+                    newAIEntry.fullPeriod = nextPeriodFull;
+                    
+                    const existingApiOnlyIndex = allHistory.findIndex(p => p.period === newAIEntry.period && p.status === "API_RESULT_ONLY");
+                    if (existingApiOnlyIndex !== -1) {
+                        allHistory[existingApiOnlyIndex] = { ...allHistory[existingApiOnlyIndex], ...newAIEntry, status: "Pending" }; 
+                    } else {
+                         allHistory.unshift(newAIEntry); 
+                    }
+                    
+                    currentAIPrediction = newAIEntry;
+                    localStorage.setItem(APP_STORAGE_PREFIX + 'currentAIPrediction', JSON.stringify(currentAIPrediction));
+                }
+            }
+            
+            allHistory.sort((a, b) => { 
+                const periodNumA = a.fullPeriod ? BigInt(a.fullPeriod) : (a.period ? BigInt("202401010" + a.period) : 0); 
+                const periodNumB = b.fullPeriod ? BigInt(b.fullPeriod) : (b.period ? BigInt("202401010" + b.period) : 0);
+                if (periodNumB !== periodNumA) return Number(periodNumB - periodNumA);
+                const timeA = a.predictionTime ? new Date(a.predictionTime).getTime() : 0;
+                const timeB = b.predictionTime ? new Date(b.predictionTime).getTime() : 0;
+                return timeB - timeA;
+            });
+            
+            allHistory = allHistory.filter(item => 
+                item.status === "API_RESULT_ONLY" || 
+                item.status === "Pending" || 
+                (item.prediction && (item.prediction === "BIG" || item.prediction === "SMALL") && (item.status === "WIN" || item.status === "LOSS"))
+            );
+
+            if (allHistory.length > MAX_HISTORY_ITEMS_STORAGE) {
+                allHistory = allHistory.slice(0, MAX_HISTORY_ITEMS_STORAGE);
+            }
+
+            saveAllData();
+            updateUI(); 
+            checkSpecialConditions();
+            isUpdatingData = false;
+        }
+        function saveAllData() { /* ... (same as original) ... */
+            localStorage.setItem(APP_STORAGE_PREFIX + 'allHistory', JSON.stringify(allHistory));
+            localStorage.setItem(APP_STORAGE_PREFIX + 'localWinLevel', localWinLevel.toString());
+            localStorage.setItem(APP_STORAGE_PREFIX + 'moduleEffectiveness', JSON.stringify(moduleEffectiveness));
+        }
+        function renderHistory() { /* ... (same as original, ensure it uses `allHistory`) ... */
+            if (!historyContainerEl) return;
+            const validDisplayItems = allHistory.filter(item => 
+                item.prediction && (item.prediction === "BIG" || item.prediction === "SMALL")
+            ).slice(0, MAX_HISTORY_ITEMS_DISPLAY);
+
+
+            if (validDisplayItems.length === 0) {
+                historyContainerEl.innerHTML = `<p class="text-slate-400 text-center py-5 text-xs">No AI predictions in history yet.</p>`;
+                return;
+            }
+            historyContainerEl.innerHTML = validDisplayItems.map((item, index) => {
+                let sbc = 'badge-pending'; let ibc = 'history-item-pending';
+                let dT = item.prediction; 
+                let confVal = typeof item.confidence === 'number' ? item.confidence : 0;
+                let cT = `(${(confVal * 100).toFixed(0)}%)`;
+                
+                let rD = item.result !== null ? `${item.result} (${item.resultType || ''})` : 'Wait...'; 
+                let oNT = item.oppositeNumber !== null ? `Op:${item.oppositeNumber}` : '';
+
+                if (item.status === 'WIN') { sbc = 'badge-win'; ibc = 'history-item-win'; }
+                else if (item.status === 'LOSS') { sbc = 'badge-loss'; ibc = 'history-item-loss'; }
+                
+                const pD = item.period || (item.fullPeriod ? item.fullPeriod.slice(-3) : '-'); 
+                const lS = item.logic ? item.logic.substring(0,10)+(item.logic.length > 10 ? '…' : '') : 'N/A';
+
+                return `
+                <div class="history-item ${ibc} bg-slate-800/50 p-2 rounded-md shadow-xs flex items-center gap-1.5 text-xs" 
+                     data-id="${item.id}" style="animation: fadeIn 0.15s ease-out ${index * 0.02}s backwards;">
+                    <div class="font-semibold text-slate-300 w-10 text-center py-1">${pD}</div>
+                    <div class="flex-1 grid grid-cols-4 gap-1 items-center">
+                        <div class="truncate py-1">
+                            <p class="font-medium text-slate-200">${dT} <span class="text-slate-400 text-[0.6rem]">${cT}</span></p>
+                            <p class="text-slate-500 text-[0.6rem]">${oNT}</p>
+                        </div>
+                         <div class="truncate text-slate-400 text-[0.6rem] py-1" title="${item.logic || ''}">${lS}</div>
+                        <div class="font-medium text-slate-200 truncate py-1">${rD}</div>
+                        <div class="text-right py-1"> <span class="premium-badge ${sbc}">${item.status}</span> </div>
+                    </div>
+                    <button class="delete-btn text-slate-500 hover:text-red-400 p-1 rounded-full ml-1" 
+                            onclick="handleDeletePrediction('${item.id}')" title="Delete Prediction">
+                        <i class="fas fa-times text-[0.7rem]"></i>
+                    </button>
+                </div>`;
+            }).join('');
+        }
+        function updateUI() { /* ... (same as original, ensure it uses `allHistory` and `currentAIPrediction`) ... */
+            let displayPeriod = "-";
+            if (currentAIPrediction && currentAIPrediction.fullPeriod) {
+                displayPeriod = currentAIPrediction.fullPeriod.slice(-3); 
+            } else if (lastAPIFetchedPeriodFull) {
+                 displayPeriod = (BigInt(lastAPIFetchedPeriodFull) + 1n).toString().slice(-3); 
+            } else {
+                const latestAnyItem = allHistory.find(item => item.fullPeriod || item.period); 
+                if (latestAnyItem && latestAnyItem.fullPeriod) displayPeriod = latestAnyItem.fullPeriod.slice(-3);
+                else if (latestAnyItem && latestAnyItem.period) displayPeriod = latestAnyItem.period; 
+            }
+            if (currentPeriodEl) currentPeriodEl.textContent = displayPeriod;
+
+            if (currentPredictionEl) {
+                if (currentAIPrediction && currentAIPrediction.status === "Pending" && (currentAIPrediction.prediction === "BIG" || currentAIPrediction.prediction === "SMALL")) {
+                    let confVal = typeof currentAIPrediction.confidence === 'number' ? currentAIPrediction.confidence : 0;
+                    currentPredictionEl.innerHTML = `<i class="fas fa-magic mr-1 opacity-70 text-sm"></i> ${currentAIPrediction.prediction} <span class="text-xs opacity-80">(${(confVal * 100).toFixed(0)}%)</span>`;
+                    if(activeLogicDisplayEl) {
+                        let displayLogic = "Ensemble"; 
+                        if (currentAIPrediction.logic) {
+                            if (currentAIPrediction.logic.toLowerCase().includes("flip") || currentAIPrediction.logic.toLowerCase().includes("extlvl") || currentAIPrediction.logic.toLowerCase().includes("over")) displayLogic = "Level Adjust"; 
+                            else if (currentAIPrediction.logic.toLowerCase().includes("ens(")) displayLogic = "Ensemble V6"; 
+                        }
+                        activeLogicDisplayEl.textContent = displayLogic;
+                    }
+                } else {
+                    currentPredictionEl.innerHTML = `<i class="fas fa-hourglass-start mr-1 opacity-70 text-sm"></i> Wait...`;
+                     if(activeLogicDisplayEl) activeLogicDisplayEl.textContent = 'N/A';
+                }
+            }
+
+            const latestResolvedItem = allHistory.find(p => p.status === "WIN" || p.status === "LOSS" || p.status === "API_RESULT_ONLY");
+            if (currentResultEl && latestResolvedItem) {
+                currentResultEl.textContent = `${latestResolvedItem.result !== null ? latestResolvedItem.result : ''} (${latestResolvedItem.resultType || ''})`;
+                if (resultIconEl) {
+                    if (latestResolvedItem.status === 'WIN') resultIconEl.innerHTML = '<i class="fas fa-trophy text-yellow-300"></i>';
+                    else if (latestResolvedItem.status === 'LOSS') resultIconEl.innerHTML = '<i class="fas fa-heart-crack text-red-300"></i>';
+                    else if (latestResolvedItem.status === 'API_RESULT_ONLY') resultIconEl.innerHTML = '<i class="fas fa-receipt text-indigo-300"></i>'; 
+                    else resultIconEl.innerHTML = '<i class="fas fa-spinner fa-spin text-sky-200"></i>'; 
+                }
+            } else if (currentResultEl) {
+                currentResultEl.textContent = "-"; if (resultIconEl) resultIconEl.innerHTML = "";
+            }
+
+            const stats = calculateOverallStats(allHistory);
+            if (winRateEl) winRateEl.textContent = `${stats.winRate}%`;
+            if (totalWinBetsEl) totalWinBetsEl.textContent = stats.totalWins;
+            if (totalLossBetsEl) totalLossBetsEl.textContent = stats.totalLosses;
+            if (localWinLevelDisplayEl) localWinLevelDisplayEl.textContent = localWinLevel;
+
+            const freqHistory = allHistory.filter(p => p.status !== "Pending" && p.resultType).map(p => p.resultType);
+            const {mostFrequent, leastFrequent} = getFrequencyStats(freqHistory);
+            if (mostFrequentEl) mostFrequentEl.textContent = mostFrequent || '-';
+            if (leastFrequentEl) leastFrequentEl.textContent = leastFrequent || '-';
+            
+            renderHistory(); 
+        }
+        function calculateOverallStats(history) { /* ... (same as original) ... */
+            const aiPredictionsResolved = history.filter(p => (p.status === "WIN" || p.status === "LOSS") && p.prediction && (p.prediction === "BIG" || p.prediction === "SMALL"));
+            const wins = aiPredictionsResolved.filter(p => p.status === "WIN").length;
+            const losses = aiPredictionsResolved.filter(p => p.status === "LOSS").length;
+            const total = wins + losses;
+            const winRate = total > 0 ? ((wins / total) * 100).toFixed(1) : "0.0";
+            return { winRate, totalWins: wins, totalLosses: losses, totalCompleted: total };
+        }
+        function getFrequencyStats(items) { /* ... (same as original) ... */
+            if (!items || items.length === 0) return { mostFrequent: null, leastFrequent: null };
+            const frequencyMap = items.reduce((acc, val) => { acc[val] = (acc[val] || 0) + 1; return acc; }, {});
+            const sortedFrequencies = Object.entries(frequencyMap).sort(([,a],[,b]) => b-a);
+            return {
+                mostFrequent: sortedFrequencies.length > 0 ? sortedFrequencies[0][0] : null,
+                leastFrequent: sortedFrequencies.length > 0 ? sortedFrequencies[sortedFrequencies.length - 1][0] : null,
+            };
+        }
+        function handleDeletePrediction(itemId) { /* ... (same as original) ... */
+            allHistory = allHistory.filter(p => p.id !== itemId);
+            if (currentAIPrediction && currentAIPrediction.id === itemId) {
+                currentAIPrediction = null; 
+                localStorage.removeItem(APP_STORAGE_PREFIX + 'currentAIPrediction');
+            }
+            saveAllData(); updateUI();
+        }
+        function handleClearHistory() { /* ... (same as original) ... */ clearHistoryModal.style.display = 'block'; }
+        function confirmClearHistoryAction() { /* ... (same as original) ... */
+            allHistory = []; currentAIPrediction = null; localWinLevel = 0; lastAPIFetchedPeriodFull = null;
+            localStorage.removeItem(APP_STORAGE_PREFIX + 'allHistory');
+            localStorage.removeItem(APP_STORAGE_PREFIX + 'currentAIPrediction');
+            localStorage.removeItem(APP_STORAGE_PREFIX + 'localWinLevel');
+            localStorage.removeItem(APP_STORAGE_PREFIX + 'lastAPIFetchedPeriodFull');
+            localStorage.removeItem(APP_STORAGE_PREFIX + 'lossTriggered');
+            localStorage.removeItem(APP_STORAGE_PREFIX + 'winTriggered'); // Clear winTriggered as well
+            moduleEffectiveness = { Trend: { wins: 0, losses: 0, weightMultiplier: 1.0 }, Dominance: { wins: 0, losses: 0, weightMultiplier: 1.0 }, Recency: { wins: 0, losses: 0, weightMultiplier: 1.0 }, CP: { wins: 0, losses: 0, weightMultiplier: 1.0 }, Rhythm: { wins: 0, losses: 0, weightMultiplier: 1.0 }, Volatility: { wins: 0, losses: 0, weightMultiplier: 1.0 } };
+            saveAllData(); 
+            updateUI(); clearHistoryModal.style.display = 'none';
+        }
+        function checkSpecialConditions() { 
+            // Removed the auto-logout condition tied to winTriggered and server status,
+            // as server status logout is handled directly in fetchPredictorServerStatus.
+            if (localStorage.getItem(APP_STORAGE_PREFIX + 'lossTriggered') === 'true') return;
+            const ourResolvedPredictions = allHistory.filter(p => (p.status === "WIN" || p.status === "LOSS") && p.prediction).slice(0,5);
+            if (ourResolvedPredictions.length === 5 && ourResolvedPredictions.every(p => p.status === "LOSS")) {
+                const telegramMessage = encodeURIComponent('Sir, NEWROX AI has 5 consecutive losses. Please check.');
+                localStorage.setItem(APP_STORAGE_PREFIX + 'lossTriggered', 'true');
+                alert(`NEWROX AI: 5 consecutive losses. Contact @NEWROXAI.`);
+                return; 
+            }
+            // Win popup condition remains
+            if (localStorage.getItem(APP_STORAGE_PREFIX + 'winTriggered') === 'true') return;
+            const { winRate, totalCompleted } = calculateOverallStats(allHistory);
+            if (totalCompleted >= 15 && parseFloat(winRate) >= 60) {
+                if (winRatePopup) winRatePopup.style.display = 'block';
+                localStorage.setItem(APP_STORAGE_PREFIX + 'winTriggered', 'true');
+            }
+        }
+
+        // --- Event Listeners and Initialization ---
+        document.addEventListener('DOMContentLoaded', function() {
+            checkPredictorLoginStatus(); 
+
+            if(predictorLogoutBtn) predictorLogoutBtn.addEventListener('click', () => handlePredictorLogout("You have been logged out."));
+            if(copyGeneratedIdBtn) copyGeneratedIdBtn.addEventListener('click', copyGeneratedDeviceId);
+            
+            pageButtons.forEach(button => button.addEventListener('click', () => switchPage(button.dataset.page)));
+            if (clearHistoryBtn) clearHistoryBtn.addEventListener('click', handleClearHistory);
+            if (confirmClearBtn) confirmClearBtn.addEventListener('click', confirmClearHistoryAction);
+            if (cancelClearBtn) cancelClearBtn.addEventListener('click', () => clearHistoryModal.style.display = 'none');
+            if (closeWinPopupBtn) closeWinPopupBtn.addEventListener('click', () => winRatePopup.style.display = 'none');
+            
+            const lastActiveTab = localStorage.getItem(APP_STORAGE_PREFIX + 'active_tab');
+            switchPage(lastActiveTab || 'main'); 
+
+            setInterval(updateGameData, API_FETCH_INTERVAL);
+        });
+    </script>
 </body>
 </html>
